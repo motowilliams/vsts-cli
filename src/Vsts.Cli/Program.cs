@@ -10,11 +10,13 @@ namespace Vsts.Cli
     {
         const string Help = "-? | -h | --help";
 
+        const string Code = "code";
         const string PullRequests = "pullrequests";
         const string WorkItems = "workitems";
         const string Builds = "builds";
         const string Releases = "releases";
         const string TestManagement = "testmanagement";
+        const string Dashboard = "dashboard";
 
         const string New = "new";
         const string Active = "active";
@@ -102,6 +104,9 @@ namespace Vsts.Cli
                 {
                     switch (dashboardArgument.Value.NormalizeCommand())
                     {
+                        case Code:
+                            vsts.CodeUri.Browse();
+                            break;
                         case Builds:
                             vsts.BuildsUri.Browse();
                             break;
@@ -117,10 +122,24 @@ namespace Vsts.Cli
                         case TestManagement:
                             vsts.TestManagementUri.Browse();
                             break;
-                        default:
+                        case Dashboard:
                             vsts.ProjectUri.Browse();
                             break;
+                        default:
+                            vsts.CodeUri.Browse();
+                            break;
                     }
+                    return 0;
+                });
+            });
+
+            var codeCommand = app.Command(Code, config =>
+            {
+                config.Description = "launches the default browser to the current repos code dashboard";
+                config.HelpOption(Help);
+                config.OnExecute(() =>
+                {
+                    vsts.CodeBranchUri.Browse();
                     return 0;
                 });
             });
