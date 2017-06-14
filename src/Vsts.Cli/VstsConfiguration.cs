@@ -51,7 +51,8 @@ namespace Vsts.Cli
         public string ProjectName => _configuration.Single(x => x.AccountName.Equals(_gitConfiguration.Host, StringComparison.OrdinalIgnoreCase)).ProjectName;
         public string PersonalAccessToken => _configuration.Single(x => x.AccountName.Equals(_gitConfiguration.Host, StringComparison.OrdinalIgnoreCase)).PersonalAccessToken;
         public string RepositoryName => _gitConfiguration.Name;
-        public string RepositoryId => ActiveConfiguration.RepositoryRegistrations.Single(x=>x.Directory.Equals(_closestGitDirectory)).RepositoryId;
+        public string RepositoryBranchName => _gitConfiguration.CurrentBranch;
+        public string RepositoryId => ActiveConfiguration.RepositoryRegistrations.Single(x => x.Directory.Equals(_closestGitDirectory)).RepositoryId;
 
         public Uri PullRequestIdUri(int pullRequestId)
             => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_git/{RepositoryName}/pullrequest/{pullRequestId}");
@@ -59,6 +60,8 @@ namespace Vsts.Cli
         public Uri AccountUri => new Uri($"https://{Host}.visualstudio.com");
         public Uri WorkItemsUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_backlogs");
         public Uri ProjectUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}");
+        public Uri CodeUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_git/{RepositoryName}");
+        public Uri CodeBranchUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_git/{RepositoryName}?version=GB{RepositoryBranchName}&_a=contents");
         public Uri BuildsUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_build?_a=allDefinitions");
         public Uri ReleasesUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_release");
         public Uri TestManagementUri => new Uri($"https://{Host}.visualstudio.com/{ProjectName}/_testManagement");
@@ -69,7 +72,7 @@ namespace Vsts.Cli
                 .RepositoryRegistrations.Add(new RepositoryRegistration(repositoryName, repositoryId, _closestGitDirectory));
 
             var json = JsonConvert.SerializeObject(_configuration, Formatting.Indented);
-            File.WriteAllText(VstsCliConfigPath,json);
+            File.WriteAllText(VstsCliConfigPath, json);
         }
 
         public string Credentials => Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format($"{String.Empty}:{PersonalAccessToken}")));

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
@@ -11,6 +12,7 @@ namespace Vsts.Cli
         public string Host { get; set; }
         public string Origin { get; set; }
         public bool NonVstsHost => Origin == null || !Origin.Contains("visualstudio.com");
+        public string CurrentBranch { get; set; }
     }
 
     public static class GitRepoHelpers
@@ -50,6 +52,7 @@ namespace Vsts.Cli
 
                 configuration.Name = origin.Url.Split('/').Last();
                 configuration.Host = new Uri(origin.Url).Host.Split('.').First();
+                configuration.CurrentBranch = repo.Head.FriendlyName;
             }
 
             return configuration;
