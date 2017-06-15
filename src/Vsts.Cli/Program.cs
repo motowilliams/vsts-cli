@@ -133,6 +133,31 @@ namespace Vsts.Cli
                 });
             });
 
+            var buildCommand = app.Command(Builds, config =>
+            {
+                config.HelpOption(Help);
+                config.OnExecute(() =>
+                {
+                    var details = vstsApiHelper.GetBuildListDetails(vsts.ProjectName);
+
+                    var detailIdWidth = details.Max(x => x.definition.id.ToString().Length);
+                    var buildNameWidth = details.Select(x => x.definition.name).Distinct().Max(x => x.Length);
+
+                    foreach (var buildDefinitionId in details.Select(x => x.definition.name).Distinct().OrderBy(x => x))
+                    {
+                        var buildListItems = details.Where(x => x.definition.name.Equals(buildDefinitionId));
+                        var detail = buildListItems.OrderByDescending(x => x.finishTime).First();
+
+                        Console.ForegroundColor = detail.result.Equals("failed") ? ConsoleColor.Red : ConsoleColor.Green;
+                        Console.WriteLine($"{detail.definition.id.ToString().PadRight(detailIdWidth, ' ')} {detail.definition.name.PadRight(buildNameWidth)} {detail.finishTime.ToLocalTime():yyyy/MM/dd hh:mm} {detail.buildNumber}");
+                        Console.ResetColor();
+                    }
+
+                    return 0;
+
+                });
+            });
+
             var codeCommand = app.Command(Code, config =>
             {
                 config.Description = "launches the default browser to the current repos code dashboard";

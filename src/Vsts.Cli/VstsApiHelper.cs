@@ -119,5 +119,39 @@ namespace Vsts.Cli
             var resource = JsonConvert.DeserializeObject<NewWorkItemResource>(result);
             return resource;
         }
+
+        public IEnumerable<BuildDefinition> GetBuildList(string projectName)
+        {
+            var uri = $"DefaultCollection/{projectName}/_apis/build/definitions";
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
+
+            if (!response.IsSuccessStatusCode) return Enumerable.Empty<BuildDefinition>();
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<BuildDefinitionResource>(result);
+            return resource.value.AsEnumerable();
+        }
+
+        public IEnumerable<BuildListItem> GetBuildListDetails(string projectName)
+        {
+            var uri = $"DefaultCollection/{projectName}/_apis/build/builds";
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
+
+            if (!response.IsSuccessStatusCode) return Enumerable.Empty<BuildListItem>();
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<BuildListResource>(result);
+            return resource.value.AsEnumerable();
+        }
     }
 }
