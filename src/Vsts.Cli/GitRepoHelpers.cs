@@ -8,15 +8,31 @@ namespace Vsts.Cli
 {
     public class GitConfiguration
     {
+        public GitConfiguration(string gitDirectory, string currentDirectory)
+        {
+            GitDirectory = gitDirectory;
+            CurrentDirectory = currentDirectory;
+        }
+
+        public string GitDirectory { get; }
+        public string CurrentDirectory { get; }
         public string Name { get; set; }
         public string Host { get; set; }
         public string Origin { get; set; }
         public bool NonVstsHost => Origin == null || !Origin.Contains("visualstudio.com");
         public string CurrentBranch { get; set; }
+
     }
 
     public static class GitRepoHelpers
     {
+        /// <summary>
+        /// Starting from the current gitDirectory search for .git directories and then up the tree
+        /// until we reach the root drive
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="searchParent"></param>
+        /// <returns></returns>
         public static string FindDirectory(string directory, bool searchParent = false)
         {
             var directoryInfo = new DirectoryInfo(directory);
@@ -35,13 +51,15 @@ namespace Vsts.Cli
             return FindDirectory(directory, checkparent);
         }
 
-        public static GitConfiguration Create(string directory)
+        public static GitConfiguration Create(string currentDirectory)
         {
-            GitConfiguration configuration = new GitConfiguration();
+            string gitDirectory = GitRepoHelpers.FindDirectory(currentDirectory, true);
 
-            if (!Directory.Exists(directory)) return configuration;
+            GitConfiguration configuration = new GitConfiguration(gitDirectory, currentDirectory);
 
-            using (var repo = new LibGit2Sharp.Repository(directory))
+            if (!Directory.Exists(gitDirectory)) return configuration;
+
+            using (var repo = new LibGit2Sharp.Repository(gitDirectory))
             {
                 //For VSTS the repository 'name' is the last segment without a .git extension
                 Remote origin = repo.Network.Remotes.Single(x => x.Name.Equals("origin"));
