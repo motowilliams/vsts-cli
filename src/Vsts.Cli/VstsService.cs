@@ -8,18 +8,11 @@ namespace Vsts.Cli
     public static class VstsService
     {
         private const string Help = "-? | -h | --help";
-        private const string Code = "code";
-        private const string PullRequests = "pullrequests";
-        private const string WorkItems = "workitems";
-        private const string Builds = "builds";
-        private const string Releases = "releases";
-        private const string TestManagement = "testmanagement";
-        private const string Dashboard = "dashboard";
+
         private const string New = "new";
         private const string Active = "active";
         private const string Unassigned = "unassigned";
         private const string Add = "add";
-        private const string Browse = "browse";
 
         public static VstsApiHelper CheckStatus(GitConfiguration gitConfiguration, Vsts vsts)
         {
@@ -124,7 +117,7 @@ namespace Vsts.Cli
                 Name = "vsts"
             };
 
-            app.Command(Browse, config =>
+            app.Command(Command.Browse, config =>
             {
                 config.Description = "Launches the default browser to the VSTS project root";
                 var dashboardArgument = config.Argument("dashboard", "General dashboard to view. Opionts are builds, releases, workitems, pullrequests or testmanagement");
@@ -133,25 +126,25 @@ namespace Vsts.Cli
                 {
                     switch (dashboardArgument.Value.NormalizeCommand())
                     {
-                        case Code:
+                        case Command.Code:
                             vsts.CodeUri.Browse();
                             break;
-                        case Builds:
+                        case Command.Builds:
                             vsts.BuildsUri.Browse();
                             break;
-                        case Releases:
+                        case Command.Releases:
                             vsts.ReleasesUri.Browse();
                             break;
-                        case WorkItems:
+                        case Command.WorkItems:
                             vsts.WorkItemsUri.Browse();
                             break;
-                        case PullRequests:
+                        case Command.PullRequests:
                             vsts.PullRequestUri.Browse();
                             break;
-                        case TestManagement:
+                        case Command.TestManagement:
                             vsts.TestManagementUri.Browse();
                             break;
-                        case Dashboard:
+                        case Command.Dashboard:
                             vsts.ProjectUri.Browse();
                             break;
                         default:
@@ -162,7 +155,7 @@ namespace Vsts.Cli
                 });
             });
 
-            var buildCommand = app.Command(Builds, config =>
+            var buildCommand = app.Command(Command.Builds, config =>
             {
                 config.Description = "commands for working with VSTS build definitions";
                 config.HelpOption(Help);
@@ -190,7 +183,7 @@ namespace Vsts.Cli
                 });
             });
 
-            var codeCommand = app.Command(Code, config =>
+            var codeCommand = app.Command(Command.Code, config =>
             {
                 config.Description = "launches the default browser to the current repos code dashboard";
                 config.HelpOption(Help);
@@ -201,7 +194,7 @@ namespace Vsts.Cli
                 });
             });
 
-            var workItemsCommand = app.Command(WorkItems, config =>
+            var workItemsCommand = app.Command(Command.WorkItems, config =>
             {
                 config.Description = "commands for working with VSTS work items";
                 var id = config.Argument("work item identifier", "work item id or type, such as epic, user story, task or bug");
@@ -277,7 +270,7 @@ namespace Vsts.Cli
                 config.OnExecute(() =>
                 {
                     if (!typeOption.HasValue() || !titleOption.HasValue())
-                {
+                    {
                         config.ShowHelp(Add);
                         return 0;
                     }
@@ -301,7 +294,7 @@ namespace Vsts.Cli
                 });
             });
 
-            var pullRequestsCommand = app.Command(PullRequests, config =>
+            var pullRequestsCommand = app.Command(Command.PullRequests, config =>
             {
                 config.Description = "commands for working with VSTS pull requests";
                 var id = config.Argument("pull request identifier", "pull request id to browse to");
