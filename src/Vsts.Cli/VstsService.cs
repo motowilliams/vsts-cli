@@ -323,6 +323,8 @@ namespace Vsts.Cli
                 });
             });
 
+            if (args.Any())
+                args[0] = args[0].NormalizeCommand();
             app.HelpOption(Help);
             app.Execute(args);
         }
