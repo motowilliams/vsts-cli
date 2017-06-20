@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace Vsts.Cli
@@ -10,8 +9,6 @@ namespace Vsts.Cli
     public class Vsts
     {
         private readonly GitConfiguration _gitConfiguration;
-        private readonly string _currentDirectory;
-        private readonly string _closestGitDirectory;
 
         private static string UserprofileDirectory => Environment.GetEnvironmentVariable("USERPROFILE");
         private static string ConfigDirectory => Path.Combine(UserprofileDirectory, ".config");
@@ -19,18 +16,16 @@ namespace Vsts.Cli
 
         private List<VstsAccount> Accounts { get; set; }
 
-        public Vsts(GitConfiguration gitConfiguration, string currentDirectory, string closestGitDirectory)
+        public Vsts(GitConfiguration gitConfiguration)
         {
             _gitConfiguration = gitConfiguration;
-            _currentDirectory = currentDirectory;
-            _closestGitDirectory = closestGitDirectory;
 
             Accounts = File.Exists(VstsCliConfigPath)
                 ? JsonConvert.DeserializeObject<List<VstsAccount>>(File.ReadAllText(VstsCliConfigPath))
                 : new List<VstsAccount>();
         }
 
-        private VstsAccount ActiveAccount => Accounts.FirstOrDefault(x => x.HasRegisteredGitDirectory(_closestGitDirectory));
+        private VstsAccount ActiveAccount => Accounts.FirstOrDefault(x => x.HasRegisteredGitDirectory(_gitConfiguration.GitDirectory));
 
         /// <summary>
         /// Indicates if the currently directory can be linked to a VSTS project
@@ -42,11 +37,11 @@ namespace Vsts.Cli
         public bool LocalDirectoryLinked => ActiveAccount != null;
         public string GitHost => _gitConfiguration.Host;
         public string AccountName => ActiveAccount.AccountName;
-        public string ProjectName => ActiveAccount.CurrentProject(_closestGitDirectory).Name;
+        public string ProjectName => ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory).Name;
         public string PersonalAccessToken => Accounts.FirstOrDefault(x => x.AccountName.Equals(GitHost, StringComparison.OrdinalIgnoreCase))?.PersonalAccessToken;
         public string RepositoryName => _gitConfiguration.Name;
         public string RepositoryBranchName => _gitConfiguration.CurrentBranch;
-        public string RepositoryId => ActiveAccount.CurrentProject(_closestGitDirectory).GetCurrentRepositoryId(_closestGitDirectory);
+        public string RepositoryId => ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory).GetCurrentRepositoryId(_gitConfiguration.GitDirectory);
 
         //Common VSTS Project Uris
         public Uri PullRequestIdUri(int pullRequestId) => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_git/{RepositoryName}/pullrequest/{pullRequestId}");
@@ -73,7 +68,7 @@ namespace Vsts.Cli
                     {
                         Name = repositoryName,
                         Id = repositoryId,
-                        Directory = _closestGitDirectory
+                        Directory = _gitConfiguration.GitDirectory
                     }
                 }
             };
@@ -99,7 +94,7 @@ namespace Vsts.Cli
                 if (existingProject == null)
                     configuration.Projects.Add(vstsProject);
                 else
-                    existingProject.Repositories.Add(new RepositoryRegistration { Directory = _closestGitDirectory, Id = repositoryId, Name = repositoryName });
+                    existingProject.Repositories.Add(new RepositoryRegistration { Directory = _gitConfiguration.GitDirectory, Id = repositoryId, Name = repositoryName });
             }
 
             var json = JsonConvert.SerializeObject(Accounts, Formatting.Indented);
@@ -108,12 +103,12 @@ namespace Vsts.Cli
 
         public void AddLocalDirectoryLink(string repositoryName, string repositoryId)
         {
-            VstsProject currentProject = ActiveAccount.CurrentProject(_closestGitDirectory);
+            VstsProject currentProject = ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory);
             currentProject.Repositories.Add(new RepositoryRegistration
             {
                 Name = repositoryName,
                 Id = repositoryId,
-                Directory = _closestGitDirectory
+                Directory = _gitConfiguration.GitDirectory
             });
 
             var json = JsonConvert.SerializeObject(Accounts, Formatting.Indented);

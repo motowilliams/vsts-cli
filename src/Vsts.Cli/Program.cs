@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace Vsts.Cli
@@ -22,7 +22,7 @@ namespace Vsts.Cli
                 Environment.Exit(0);
             }
 
-            Vsts vsts = new Vsts(gitConfiguration, gitConfiguration.CurrentDirectory, gitConfiguration.GitDirectory);
+            Vsts vsts = new Vsts(gitConfiguration);
 
             VstsApiHelper vstsApiHelper = VstsService.CheckStatus(gitConfiguration, vsts);
 
