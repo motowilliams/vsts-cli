@@ -262,9 +262,9 @@ namespace Vsts.Cli
             workItemsCommand.Command(Add, config =>
             {
                 config.Description = "command for adding new work items to the current project";
-                var typeOption = config.Option("--workitemtype", "work item type", CommandOptionType.SingleValue);
+                var typeOption = config.Option("--workitemtype", "work item type [required]", CommandOptionType.SingleValue);
                 typeOption.ShortName = "w";
-                var titleOption = config.Option("--title", "work item title", CommandOptionType.SingleValue);
+                var titleOption = config.Option("--title", "work item title [required] ", CommandOptionType.SingleValue);
                 typeOption.ShortName = "t";
                 var descriptionOption = config.Option("--description", "work item description", CommandOptionType.SingleValue);
                 descriptionOption.ShortName = "d";
@@ -276,6 +276,12 @@ namespace Vsts.Cli
 
                 config.OnExecute(() =>
                 {
+                    if (!typeOption.HasValue() || !titleOption.HasValue())
+                {
+                        config.ShowHelp(Add);
+                        return 0;
+                    }
+
                     var document = new List<Object>();
                     document.Add(new { op = "add", path = "/fields/System.Title", value = titleOption.Value() });
 
