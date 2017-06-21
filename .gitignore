@@ -290,3 +290,6 @@ __pycache__/
 
 tools/
 src/.nuget/nuget.exe
+
+# Visual Studio Code
+.vscode/
