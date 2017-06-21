@@ -240,12 +240,14 @@ namespace Vsts.Cli
                     var stateWidth = details.Select(x => x.State).Distinct().Max(x => x.Length);
                     var assignments = details.Where(x => !string.IsNullOrWhiteSpace(x.AssignedToName)).Distinct();
                     var assignedToNameWidth = assignments.Any() ? assignments.Select(x => x.AssignedToName).Max(x => x.Length) : 0;
+                    var workItemTypeWidth = details.Select(x => x.WorkItemType).Distinct().Max(x => x.Length);
 
-                    foreach (Fields detail in details)
+                    // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
+                    foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x=>x.CreatedDate))
                     {
                         var assignedTo = $"{detail.AssignedToName ?? Unassigned}";
                         var color = string.IsNullOrWhiteSpace(detail.AssignedToName) ? ConsoleColor.DarkYellow : ConsoleColor.Green;
-                        Console.WriteLine($"#{detail.Id.ToString().PadRight(detailIdWidth)} {detail.State.PadRight(stateWidth)} {detail.CreatedDate.ToLocalTime():yyyy/MM/dd} {assignedTo.PadRight(assignedToNameWidth)} {detail.Title.Trim()} : {detail.Tags ?? "no tags"}", color);
+                        Console.WriteLine($"#{detail.Id.ToString().PadRight(detailIdWidth)} {detail.State.PadRight(stateWidth)} {detail.WorkItemType.PadRight(workItemTypeWidth)} {detail.CreatedDate.ToLocalTime():yyyy/MM/dd} {assignedTo.PadRight(assignedToNameWidth)} {detail.Title.Trim()} : {detail.Tags ?? "no tags"}", color);
                         if (singleWorkItem || descriptionOption.HasValue())
                             Console.WriteLine($"{" ".PadRight(detailIdWidth + 1)} {detail.Description ?? "no description provided"}", color);
                     }
