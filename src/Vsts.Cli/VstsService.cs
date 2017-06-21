@@ -199,8 +199,10 @@ namespace Vsts.Cli
                 config.Description = "commands for working with VSTS work items";
                 var id = config.Argument("work item identifier", "work item id or type, such as epic, user story, task or bug");
                 id.ShowInHelpText = true;
-                var stateOption = config.Option("--states", "work item states", CommandOptionType.MultipleValue);
+                var stateOption = config.Option("--states", "filter by states such as new, active, resolved, closed or removed", CommandOptionType.MultipleValue);
                 stateOption.ShortName = "s";
+                var tagOption = config.Option("--tags", "filter by any tag that assigned to work items", CommandOptionType.MultipleValue);
+                tagOption.ShortName = "t";
                 var descriptionOption = config.Option("--description", "include description", CommandOptionType.NoValue);
                 descriptionOption.ShortName = "d";
                 var browseOption = config.Option("--browse", "browse specific work item in VSTS", CommandOptionType.NoValue);
@@ -230,7 +232,7 @@ namespace Vsts.Cli
                             stateArgumentValues.Add(Active);
                         }
 
-                        IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues);
+                        IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues, tagOption.Values);
                         details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
                     }
 
