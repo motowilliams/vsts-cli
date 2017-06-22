@@ -321,7 +321,12 @@ namespace Vsts.Cli
             });
 
             if (args.Any())
+            {
+                var strings = Help.Split('|').Select(x => x.Trim());
+                if (!strings.Any(x => x.Equals(args[0], StringComparison.OrdinalIgnoreCase)))
                 args[0] = args[0].NormalizeCommand();
+            }
+
             app.HelpOption(Help);
             app.Execute(args);
         }
