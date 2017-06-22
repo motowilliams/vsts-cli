@@ -337,7 +337,7 @@ namespace Vsts.Cli
         public BuildListItem[] value { get; set; }
     }
 
-    public class BuildListItem
+    public partial class BuildListItem
     {
         public _Links _links { get; set; }
         public Plan[] plans { get; set; }
@@ -368,6 +368,40 @@ namespace Vsts.Cli
         public bool retainedByRelease { get; set; }
         public int buildNumberRevision { get; set; }
         public string parameters { get; set; }
+    }
+
+    public partial class BuildListItem
+    {
+        public ConsoleColor ConsoleColor => status.Equals("completed", StringComparison.OrdinalIgnoreCase)
+            ? result.Equals("failed") ? ConsoleColor.Red : ConsoleColor.Green : ConsoleColor.Yellow;
+
+        public int ResultNameLength => string.IsNullOrWhiteSpace(result) ? 1 : result.Length;
+        public string ResultName(int max) => string.IsNullOrWhiteSpace(result) ? " ".PadRight(max) : result.PadRight(max);
+
+        public string TimeReport =>
+            status.Equals("completed", StringComparison.OrdinalIgnoreCase)
+            ? (finishTime.Equals(DateTime.MinValue) ? " ".PadRight(16) : $"{finishTime.ToLocalTime():yyyy/MM/dd hh:mm}")
+            : $"{GetTimeSpan(startTime).PadRight(16)}";
+        //: $"{DateTime.Now:yyyy/MM/dd hh:mm}";
+
+        private string GetTimeSpan(DateTime past)
+        {
+            if (status.Equals("notStarted", StringComparison.OrdinalIgnoreCase)) return " ";
+
+            var timeSpan = (DateTime.UtcNow - past);
+
+            var seconds = timeSpan.Seconds;
+            int minutes = timeSpan.Minutes;
+
+            if (minutes < 1 && seconds <= 60)
+                return $"{seconds} seconds";
+
+            return $"{minutes} min {seconds} sec";
+        }
+
+        public int StatusNameLength => string.IsNullOrWhiteSpace(status) ? 1 : status.Length;
+        public int DefinitionNameLength => string.IsNullOrWhiteSpace(definition?.name) ? 1 : definition.name.Length;
+        public int DefinitionIdLength => id.ToString().Length;
     }
 
     public class _Links

@@ -166,16 +166,15 @@ namespace Vsts.Cli
                     if (!details.Any())
                         return 0;
 
-                    var detailIdWidth = details.Max(x => x.definition.id.ToString().Length);
-                    var buildNameWidth = details.Select(x => x.definition.name).Distinct().Max(x => x.Length);
+                    var detailIdWidth = details.Max(x => x.DefinitionIdLength);
+                    var buildNameWidth = details.Max(x => x.DefinitionNameLength);
+                    var statusNameWidth = details.Max(x => x.StatusNameLength);
+                    var resultNameWidth = details.Max(x => x.ResultNameLength);
 
-                    foreach (var buildDefinitionId in details.Select(x => x.definition.name).Distinct().OrderBy(x => x))
+                    foreach (var definitionGroup in details.GroupBy(x => x.definition.name).OrderBy(x => x.Key))
                     {
-                        var buildListItems = details.Where(x => x.definition.name.Equals(buildDefinitionId));
-                        var detail = buildListItems.OrderByDescending(x => x.finishTime).First();
-
-                        System.Console.ForegroundColor = detail.result.Equals("failed") ? ConsoleColor.Red : ConsoleColor.Green;
-                        Console.WriteLine($"{detail.definition.id.ToString().PadRight(detailIdWidth, ' ')} {detail.definition.name.PadRight(buildNameWidth)} {detail.finishTime.ToLocalTime():yyyy/MM/dd hh:mm} {detail.buildNumber}", System.Console.ForegroundColor);
+                        BuildListItem detail = definitionGroup.OrderByDescending(x => x.id).First();
+                        Console.WriteLine($"{detail.definition.id.ToString().PadRight(detailIdWidth, ' ')} {detail.status.PadRight(statusNameWidth)} {detail.ResultName(resultNameWidth)} {detail.definition.name.PadRight(buildNameWidth)} {detail.TimeReport} {detail.buildNumber}", detail.ConsoleColor);
                     }
 
                     return 0;
@@ -243,7 +242,7 @@ namespace Vsts.Cli
                     var workItemTypeWidth = details.Select(x => x.WorkItemType).Distinct().Max(x => x.Length);
 
                     // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
-                    foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x=>x.CreatedDate))
+                    foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x => x.CreatedDate))
                     {
                         var assignedTo = $"{detail.AssignedToName ?? Unassigned}";
                         var color = string.IsNullOrWhiteSpace(detail.AssignedToName) ? ConsoleColor.DarkYellow : ConsoleColor.Green;
@@ -324,7 +323,7 @@ namespace Vsts.Cli
             {
                 var strings = Help.Split('|').Select(x => x.Trim());
                 if (!strings.Any(x => x.Equals(args[0], StringComparison.OrdinalIgnoreCase)))
-                args[0] = args[0].NormalizeCommand();
+                    args[0] = args[0].NormalizeCommand();
             }
 
             app.HelpOption(Help);
