@@ -184,5 +184,56 @@ namespace Vsts.Cli
             var resource = JsonConvert.DeserializeObject<BuildListResource>(result);
             return resource.value.AsEnumerable();
         }
+
+        public BuildListItem GetBuildDetail(string projectName, int buildDefinitionId)
+        {
+            var uri = $"DefaultCollection/{projectName}/_apis/build/builds?definitions={buildDefinitionId}&statusFilter=completed&$top=1&api-version=2.0";
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<BuildListResource>(result);
+            return resource.value.FirstOrDefault();
+        }
+
+        public IEnumerable<Record> GetBuildTimeline(string projectName, int buildId)
+        {
+            var uri = $"DefaultCollection/{projectName}/_apis/build/builds/{buildId}/Timeline";
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
+
+            if (!response.IsSuccessStatusCode) return Enumerable.Empty<Record>();
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<TimelineResource>(result);
+            return resource.records.OrderBy(x => x.order);
+        }
+
+        public IEnumerable<string> GetBuildLogEntry(string projectName, int buildId, int logId)
+        {
+            var uri = $"DefaultCollection/{projectName}/_apis/build/builds/{buildId}/logs/{logId}";
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
+
+            if (!response.IsSuccessStatusCode) return Enumerable.Empty<string>();
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<LogResource>(result);
+            return resource.value;
+        }
     }
 }

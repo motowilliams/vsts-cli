@@ -382,7 +382,6 @@ namespace Vsts.Cli
             status.Equals("completed", StringComparison.OrdinalIgnoreCase)
             ? (finishTime.Equals(DateTime.MinValue) ? " ".PadRight(16) : $"{finishTime.ToLocalTime():yyyy/MM/dd hh:mm}")
             : $"{GetTimeSpan(startTime).PadRight(16)}";
-        //: $"{DateTime.Now:yyyy/MM/dd hh:mm}";
 
         private string GetTimeSpan(DateTime past)
         {
@@ -485,5 +484,97 @@ namespace Vsts.Cli
         public string planId { get; set; }
     }
 
+    //Timeline
+    public class TimelineResource
+    {
+        public Record[] records { get; set; }
+        public string lastChangedBy { get; set; }
+        public DateTime lastChangedOn { get; set; }
+        public string id { get; set; }
+        public int changeId { get; set; }
+        public string url { get; set; }
+    }
+
+    public partial class Record
+    {
+        public string id { get; set; }
+        public string parentId { get; set; }
+        public string type { get; set; }
+        public string name { get; set; }
+        public DateTime startTime { get; set; }
+        public DateTime finishTime { get; set; }
+        public object currentOperation { get; set; }
+        public object percentComplete { get; set; }
+        public string state { get; set; }
+        public string result { get; set; }
+        public object resultCode { get; set; }
+        public int changeId { get; set; }
+        public DateTime lastModified { get; set; }
+        public string workerName { get; set; }
+        public int order { get; set; }
+        public Details details { get; set; }
+        public int errorCount { get; set; }
+        public int warningCount { get; set; }
+        public object url { get; set; }
+        public Log log { get; set; }
+        public Task task { get; set; }
+        public Issue[] issues { get; set; }
+    }
+
+    public partial class Record
+    {
+        public string resultSymbol => result.Equals("succeed", StringComparison.OrdinalIgnoreCase) ? "+" : result.Equals("skipped", StringComparison.OrdinalIgnoreCase) ? "=" : "x";
+
+
+        public ConsoleColor ConsoleColor => state.Equals("completed", StringComparison.OrdinalIgnoreCase)
+            ? result.Equals("failed") ? ConsoleColor.Red : ConsoleColor.Green : ConsoleColor.Yellow;
+    }
+
+    public class Details
+    {
+        public string id { get; set; }
+        public int changeId { get; set; }
+        public string url { get; set; }
+    }
+
+    public class Log
+    {
+        public int id { get; set; }
+        public string type { get; set; }
+        public string url { get; set; }
+    }
+
+    public class Task
+    {
+        public string id { get; set; }
+        public string name { get; set; }
+        public string version { get; set; }
+    }
+
+    public class Issue
+    {
+        public string type { get; set; }
+        public string category { get; set; }
+        public string message { get; set; }
+        public Data data { get; set; }
+    }
+
+    public class Data
+    {
+        public string type { get; set; }
+        public string code { get; set; }
+        public string sourcepath { get; set; }
+        public string linenumber { get; set; }
+        public string columnnumber { get; set; }
+        public string repo { get; set; }
+    }
+
+    //Logs
+
+    public class LogResource
+    {
+        public int count { get; set; }
+        public string[] value { get; set; }
+    }
 
 }

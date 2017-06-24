@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Vsts.Cli
@@ -179,6 +180,43 @@ namespace Vsts.Cli
 
                     return 0;
 
+                });
+            });
+
+            buildCommand.Command("log", config =>
+            {
+                config.Description = "view latest build log for build definition";
+                var buildIdOption = config.Option("--id", "build definition", CommandOptionType.SingleValue);
+                buildIdOption.ShortName = "i";
+                var buildLogDetailOption = config.Option("--detail", "build definition", CommandOptionType.NoValue);
+                buildLogDetailOption.ShortName = "d";
+                config.HelpOption(Help);
+                config.OnExecute(() =>
+                {
+                    if (!buildIdOption.HasValue() || !int.TryParse(buildIdOption.Value(), out int buildDefinitionId))
+                        return 1;
+
+                    var detail = vstsApiHelper.GetBuildDetail(vsts.ProjectName, buildDefinitionId);
+
+                    if (detail == null)
+                        return 1;
+
+                    var records = vstsApiHelper.GetBuildTimeline(vsts.ProjectName, detail.id);
+
+                    if (!records.Any())
+                        return 1;
+
+                    Console.WriteLine($"{records.First().resultSymbol} {records.First().name}", records.First().ConsoleColor);
+                    foreach (var record in records.Skip(1).OrderBy(x => x.order))
+                        Console.WriteLine($"-{record.resultSymbol} {record.name}", record.ConsoleColor);
+
+                    if (buildLogDetailOption.HasValue())
+                    {
+                        var buildLogEntry = vstsApiHelper.GetBuildLogEntry(vsts.ProjectName, detail.id, records.OrderBy(x => x.order).First().log.id);
+                        buildLogEntry.ToList().ForEach(Console.WriteLine);
+                    }
+
+                    return 0;
                 });
             });
 
