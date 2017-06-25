@@ -110,17 +110,22 @@ namespace Vsts.Cli
         public static void ProcessArgs(string[] args, Vsts vsts, VstsApiHelper vstsApiHelper)
         {
             if (args == null || args.Length == 0)
+            {
+                Console.Logo();
                 args = new[] { "-h" };
+            }
 
             //Now we can start to inspect the command-line arguments
             var app = new CommandLineApplication(throwOnUnexpectedArg: false)
             {
-                Name = "vsts"
+                Name = "vsts",
+                Description = "Visual Studio Team Services Command Line Interface",
+                ShowInHelpText = true
             };
 
             app.Command(Command.Browse, config =>
             {
-                config.Description = "Launches the default browser to the VSTS project root";
+                config.Description = "launches the default browser to the VSTS project root";
                 var dashboardArgument = config.Argument("dashboard", "General dashboard to view. Opionts are builds, releases, workitems, pullrequests or testmanagement");
                 config.HelpOption(Help);
                 config.OnExecute(() =>
@@ -188,7 +193,7 @@ namespace Vsts.Cli
                 config.Description = "view latest build log for build definition";
                 var buildIdOption = config.Option("--id", "build definition", CommandOptionType.SingleValue);
                 buildIdOption.ShortName = "i";
-                var buildLogDetailOption = config.Option("--detail", "build definition", CommandOptionType.NoValue);
+                var buildLogDetailOption = config.Option("--detail", "how the log file for the build", CommandOptionType.NoValue);
                 buildLogDetailOption.ShortName = "d";
                 config.HelpOption(Help);
                 config.OnExecute(() =>

@@ -32,5 +32,14 @@ namespace Vsts.Cli
         {
             return System.Console.ReadLine();
         }
+
+        public static void Logo()
+        {
+            Console.WriteLine(@"    _  _  ____  ____  ____     ___  __    __ ", ConsoleColor.Blue);
+            Console.WriteLine(@"   / )( \/ ___)(_  _)/ ___)   / __)(  )  (  )", ConsoleColor.Blue);
+            Console.WriteLine(@"   \ \/ /\___ \  )(  \___ \  ( (__ / (_/\ )( ", ConsoleColor.Blue);
+            Console.WriteLine(@"    \__/ (____/ (__) (____/   \___)\____/(__)", ConsoleColor.Blue);
+            Console.Write(@"Visual Studio Team Service Command Line Interface", ConsoleColor.Blue);
+        }
     }
 }

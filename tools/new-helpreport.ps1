@@ -4,6 +4,7 @@ $command = "vsts"
 $currentDirectory = (Get-Location).path
 
 $commands = @(
+    "",
     "-h",
     "browse -h",
     "builds -h",
@@ -14,7 +15,7 @@ $commands = @(
     "workitems add -h"
 )
 
-Remove-Item -Path $helpFile
+Remove-Item -Path $helpFile -ErrorAction Ignore
 $commands | ForEach-Object {
     $commandOutput = Invoke-CommandString -command $command -commandArgs $_
     Write-Output "### $command $_" | Out-File -Append -FilePath $helpFile

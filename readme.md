@@ -29,6 +29,27 @@ The token will be promped when you run the tool for the first time and attempt t
 - pull requests
 - work items
 
+### vsts 
+```    _  _  ____  ____  ____     ___  __    __ 
+   / )( \/ ___)(_  _)/ ___)   / __)(  )  (  )
+   \ \/ /\___ \  )(  \___ \  ( (__ / (_/\ )( 
+    \__/ (____/ (__) (____/   \___)\____/(__)
+Visual Studio Team Service Command Line Interface
+
+Usage: vsts [options] [command]
+
+Options:
+  -? | -h | --help  Show help information
+
+Commands:
+  browse        launches the default browser to the VSTS project root
+  builds        commands for working with VSTS build definitions
+  code          launches the default browser to the current repos code dashboard
+  pullrequests  commands for working with VSTS pull requests
+  workitems     commands for working with VSTS work items
+
+Use "vsts [command] --help" for more information about a command.
+```
 ### vsts -h
 ```
 Usage: vsts [options] [command]
@@ -37,7 +58,7 @@ Options:
   -? | -h | --help  Show help information
 
 Commands:
-  browse        Launches the default browser to the VSTS project root
+  browse        launches the default browser to the VSTS project root
   builds        commands for working with VSTS build definitions
   code          launches the default browser to the current repos code dashboard
   pullrequests  commands for working with VSTS pull requests
@@ -45,6 +66,7 @@ Commands:
 
 Use "vsts [command] --help" for more information about a command.
 ```
+## Browse
 ### vsts browse -h
 ```
 Usage: vsts browse [arguments] [options]
@@ -55,7 +77,7 @@ Arguments:
 Options:
   -? | -h | --help  Show help information
 ```
-
+## Builds
 ### vsts builds -h
 ```
 Usage: vsts builds [options] [command]
@@ -68,6 +90,7 @@ Commands:
 
 Use "builds [command] --help" for more information about a command.
 ```
+## Builds
 ### vsts builds log -h
 ```
 Usage: vsts builds log [options]
@@ -84,6 +107,7 @@ Usage: vsts code [options]
 Options:
   -? | -h | --help  Show help information
 ```
+## Pull Requests
 ### vsts pullrequests -h
 ```
 Usage: vsts pullrequests [arguments] [options]
@@ -94,6 +118,7 @@ Arguments:
 Options:
   -? | -h | --help  Show help information
 ```
+## Work Items
 ### vsts workitems -h
 ```
 Usage: vsts workitems [arguments] [options] [command]
