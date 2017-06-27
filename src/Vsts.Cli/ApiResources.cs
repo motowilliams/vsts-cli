@@ -157,7 +157,7 @@ namespace Vsts.Cli
         public string Url { get; set; }
     }
 
-    public class Fields
+    public partial class Fields
     {
         [Newtonsoft.Json.JsonProperty("System.Id")]
         public int Id { get; set; }
@@ -179,6 +179,14 @@ namespace Vsts.Cli
         public DateTime CreatedDate { get; set; }
         [Newtonsoft.Json.JsonProperty("System.Tags")]
         public string Tags { get; set; }
+    }
+
+    public partial class Fields
+    {
+        public int WorkItemIdLength => Id.ToString().Length;
+        public int StateLength => State.Length;
+        public int AssignedToNameLength => string.IsNullOrWhiteSpace(AssignedToName) ? 0 : AssignedToName.Length;
+        public int WorkItemTypeLength => string.IsNullOrWhiteSpace(WorkItemType) ? 0 : WorkItemType.Length;
     }
 
     //New work item

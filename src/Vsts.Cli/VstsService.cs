@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Vsts.Cli
@@ -124,42 +123,42 @@ namespace Vsts.Cli
             };
 
             app.Command(Command.Browse, config =>
-            {
-                config.Description = "launches the default browser to the VSTS project root";
-                var dashboardArgument = config.Argument("dashboard", "General dashboard to view. Opionts are builds, releases, workitems, pullrequests or testmanagement");
-                config.HelpOption(Help);
-                config.OnExecute(() =>
-                {
-                    switch (dashboardArgument.Value.NormalizeCommand())
-                    {
-                        case Command.Code:
-                            vsts.CodeUri.Browse();
-                            break;
-                        case Command.Builds:
-                            vsts.BuildsUri.Browse();
-                            break;
-                        case Command.Releases:
-                            vsts.ReleasesUri.Browse();
-                            break;
-                        case Command.WorkItems:
-                            vsts.WorkItemsUri.Browse();
-                            break;
-                        case Command.PullRequests:
-                            vsts.PullRequestUri.Browse();
-                            break;
-                        case Command.TestManagement:
-                            vsts.TestManagementUri.Browse();
-                            break;
-                        case Command.Dashboard:
-                            vsts.ProjectUri.Browse();
-                            break;
-                        default:
-                            vsts.CodeUri.Browse();
-                            break;
-                    }
-                    return 0;
-                });
-            });
+             {
+                 config.Description = "launches the default browser to the VSTS project root";
+                 var dashboardArgument = config.Argument("dashboard", "General dashboard to view. Opionts are builds, releases, workitems, pullrequests or testmanagement");
+                 config.HelpOption(Help);
+                 config.OnExecute(() =>
+                 {
+                     switch (dashboardArgument.Value.NormalizeCommand())
+                     {
+                         case Command.Code:
+                             vsts.CodeUri.Browse();
+                             break;
+                         case Command.Builds:
+                             vsts.BuildsUri.Browse();
+                             break;
+                         case Command.Releases:
+                             vsts.ReleasesUri.Browse();
+                             break;
+                         case Command.WorkItems:
+                             vsts.WorkItemsUri.Browse();
+                             break;
+                         case Command.PullRequests:
+                             vsts.PullRequestUri.Browse();
+                             break;
+                         case Command.TestManagement:
+                             vsts.TestManagementUri.Browse();
+                             break;
+                         case Command.Dashboard:
+                             vsts.ProjectUri.Browse();
+                             break;
+                         default:
+                             vsts.CodeUri.Browse();
+                             break;
+                     }
+                     return 0;
+                 });
+             });
 
             var buildCommand = app.Command(Command.Builds, config =>
             {
@@ -278,14 +277,13 @@ namespace Vsts.Cli
                         details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
                     }
 
-                    var detailIdWidth = details.Max(x => x.Id.ToString().Length);
-                    var stateWidth = details.Select(x => x.State).Distinct().Max(x => x.Length);
-                    var assignments = details.Where(x => !string.IsNullOrWhiteSpace(x.AssignedToName)).Distinct();
-                    var assignedToNameWidth = assignments.Any() ? assignments.Select(x => x.AssignedToName).Max(x => x.Length) : 0;
-                    var workItemTypeWidth = details.Select(x => x.WorkItemType).Distinct().Max(x => x.Length);
+                    var detailIdWidth = details.Max(x => x.WorkItemIdLength);
+                    var stateWidth = details.Max(x => x.StateLength);
+                    var assignedToNameWidth = details.Max(x => x.AssignedToNameLength);
+                    var workItemTypeWidth = details.Max(x => x.WorkItemTypeLength);
 
-                    // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
-                    foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x => x.CreatedDate))
+                        // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
+                        foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x => x.CreatedDate))
                     {
                         var assignedTo = $"{detail.AssignedToName ?? Unassigned}";
                         var color = string.IsNullOrWhiteSpace(detail.AssignedToName) ? ConsoleColor.DarkYellow : ConsoleColor.Green;
