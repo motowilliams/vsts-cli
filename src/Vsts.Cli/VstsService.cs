@@ -9,8 +9,6 @@ namespace Vsts.Cli
     {
         private const string Help = "-? | -h | --help";
 
-        private const string New = "new";
-        private const string Active = "active";
         private const string Unassigned = "unassigned";
         private const string Add = "add";
 
@@ -190,10 +188,10 @@ namespace Vsts.Cli
             buildCommand.Command("log", config =>
             {
                 config.Description = "view latest build log for build definition";
-                var buildIdOption = config.Option("--id", "build definition", CommandOptionType.SingleValue);
-                buildIdOption.ShortName = "i";
-                var buildLogDetailOption = config.Option("--detail", "how the log file for the build", CommandOptionType.NoValue);
-                buildLogDetailOption.ShortName = "d";
+                var buildIdOption = config.Option(CommandOptionTemplates.IdTemplate, "build definition", CommandOptionType.SingleValue);
+                buildIdOption.ShortName = CommandOptionTemplates.IdTemplateShort;
+                var buildLogDetailOption = config.Option(CommandOptionTemplates.DetailTemplate, "how the log file for the build", CommandOptionType.NoValue);
+                buildLogDetailOption.ShortName = CommandOptionTemplates.DetailTemplateShort;
                 config.HelpOption(Help);
                 config.OnExecute(() =>
                 {
@@ -240,21 +238,33 @@ namespace Vsts.Cli
                 config.Description = "commands for working with VSTS work items";
                 var id = config.Argument("work item identifier", "work item id or type, such as epic, user story, task or bug");
                 id.ShowInHelpText = true;
-                var stateOption = config.Option("--states", "filter by states such as new, active, resolved, closed or removed", CommandOptionType.MultipleValue);
-                stateOption.ShortName = "s";
-                var tagOption = config.Option("--tags", "filter by any tag that assigned to work items", CommandOptionType.MultipleValue);
-                tagOption.ShortName = "t";
-                var descriptionOption = config.Option("--description", "include description", CommandOptionType.NoValue);
-                descriptionOption.ShortName = "d";
-                var browseOption = config.Option("--browse", "browse specific work item in VSTS", CommandOptionType.NoValue);
-                browseOption.ShortName = "b";
+
+                var stateOption = config.Option(CommandOptionTemplates.StatesTemplate, "filter by states such as new, active, resolved, closed or removed", CommandOptionType.MultipleValue);
+                stateOption.ShortName = CommandOptionTemplates.StatesTemplateShort;
+                var tagOption = config.Option(CommandOptionTemplates.TagTemplate, "filter by any tag that assigned to work items", CommandOptionType.MultipleValue);
+                tagOption.ShortName = CommandOptionTemplates.TagTemplateShort;
+                var descriptionOption = config.Option(CommandOptionTemplates.DescriptionTemplate, "include description", CommandOptionType.NoValue);
+                descriptionOption.ShortName = CommandOptionTemplates.DescriptionTemplateShort;
+                var myWorkItemOption = config.Option(CommandOptionTemplates.MyTemplate, "only return open work items assigned to me", CommandOptionType.NoValue);
+                myWorkItemOption.ShortName = CommandOptionTemplates.MyTemplateShort;
+                var browseOption = config.Option(CommandOptionTemplates.BrowseTemplate, "browse specific work item in VSTS", CommandOptionType.NoValue);
+                browseOption.ShortName = CommandOptionTemplates.BrowseTemplateShort;
+
                 config.HelpOption(Help);
                 config.OnExecute(() =>
                 {
                     IEnumerable<Fields> details = null;
                     bool singleWorkItem = false;
+                    var stateArgumentValues = stateOption.AsStateDefault();
 
-                    if (Int32.TryParse(id.Value, out int workItemId))
+                    if (myWorkItemOption.HasValue())
+                    {
+                        IEnumerable<WorkItem> searchWorkItems =
+                            vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
+                                tagOption.Values, vsts.FullName);
+                        details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
+                    }
+                    else if (Int32.TryParse(id.Value, out int workItemId))
                     {
                         if (browseOption.HasValue())
                         {
@@ -266,24 +276,22 @@ namespace Vsts.Cli
                     }
                     else
                     {
-                        List<string> stateArgumentValues = stateOption.Values;
-                        if (!stateArgumentValues.Any())
-                        {
-                            stateArgumentValues.Add(New);
-                            stateArgumentValues.Add(Active);
-                        }
-
-                        IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues, tagOption.Values);
+                        IEnumerable<WorkItem> searchWorkItems =
+                            vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
+                                tagOption.Values);
                         details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
                     }
+
+                    if (!details.Any())
+                        return 0;
 
                     var detailIdWidth = details.Max(x => x.WorkItemIdLength);
                     var stateWidth = details.Max(x => x.StateLength);
                     var assignedToNameWidth = details.Max(x => x.AssignedToNameLength);
                     var workItemTypeWidth = details.Max(x => x.WorkItemTypeLength);
 
-                        // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
-                        foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x => x.CreatedDate))
+                    // this sort just happens to work out for the Epic/Feature/Story level but it may not work for other project types
+                    foreach (Fields detail in details.OrderBy(x => x.WorkItemType).ThenBy(x => x.CreatedDate))
                     {
                         var assignedTo = $"{detail.AssignedToName ?? Unassigned}";
                         var color = string.IsNullOrWhiteSpace(detail.AssignedToName) ? ConsoleColor.DarkYellow : ConsoleColor.Green;
@@ -301,13 +309,14 @@ namespace Vsts.Cli
                 config.Description = "command for adding new work items to the current project";
                 var typeOption = config.Option("--workitemtype", "work item type [required]", CommandOptionType.SingleValue);
                 typeOption.ShortName = "w";
-                var titleOption = config.Option("--title", "work item title [required] ", CommandOptionType.SingleValue);
-                typeOption.ShortName = "t";
-                var descriptionOption = config.Option("--description", "work item description", CommandOptionType.SingleValue);
-                descriptionOption.ShortName = "d";
-                var priorityOption = config.Option("--priority", "work item priority", CommandOptionType.SingleValue);
-                priorityOption.ShortName = "p";
-                var tagsOption = config.Option("--tag", "work item tags", CommandOptionType.MultipleValue);
+                var titleOption = config.Option(CommandOptionTemplates.TitleTemplate, "work item title [required] ", CommandOptionType.SingleValue);
+                typeOption.ShortName = CommandOptionTemplates.TitleTemplateShort;
+                var descriptionOption = config.Option(CommandOptionTemplates.DescriptionTemplate, "work item description", CommandOptionType.SingleValue);
+                descriptionOption.ShortName = CommandOptionTemplates.DescriptionTemplateShort;
+                var priorityOption = config.Option(CommandOptionTemplates.PriorityTemplate, "work item priority", CommandOptionType.SingleValue);
+                priorityOption.ShortName = CommandOptionTemplates.PriorityTemplateShort;
+                var tagsOption = config.Option(CommandOptionTemplates.TagTemplate, "work item tags", CommandOptionType.MultipleValue);
+                tagsOption.ShortName = CommandOptionTemplates.TagTemplateShort;
 
                 config.HelpOption(Help);
 
