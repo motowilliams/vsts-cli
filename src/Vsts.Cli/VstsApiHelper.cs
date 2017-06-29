@@ -50,7 +50,7 @@ namespace Vsts.Cli
             return resource.Value.AsEnumerable();
         }
 
-        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags)
+        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null)
         {
             string uri = $"DefaultCollection/{projectName}/_apis/wit/wiql?api-version=1.0";
 
@@ -79,6 +79,14 @@ namespace Vsts.Cli
                     filterBuilder.Append(" AND ");
 
                 filterBuilder.Append($"[System.WorkItemType] = \"{workItemType.NormalizeWorkItemType()}\"");
+            }
+
+            if (!string.IsNullOrWhiteSpace(assignedTo))
+            {
+                if (filterBuilder.Length > 0)
+                    filterBuilder.Append(" AND ");
+
+                filterBuilder.Append($"[System.AssignedTo] CONTAINS \"{assignedTo}\"");
             }
 
             if (filterBuilder.Length > 0)

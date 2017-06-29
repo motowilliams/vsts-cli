@@ -37,6 +37,7 @@ namespace Vsts.Cli
         public bool LocalDirectoryLinked => ActiveAccount != null;
         public string GitHost => _gitConfiguration.Host;
         public string AccountName => ActiveAccount.AccountName;
+        public string FullName => ActiveAccount.FullName;
         public string ProjectName => ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory).Name;
         public string PersonalAccessToken => Accounts.FirstOrDefault(x => x.AccountName.Equals(GitHost, StringComparison.OrdinalIgnoreCase))?.PersonalAccessToken;
         public string RepositoryName => _gitConfiguration.Name;
@@ -137,6 +138,7 @@ namespace Vsts.Cli
 
     public class VstsAccount
     {
+        public string FullName { get; set; }
         public string AccountName { get; set; }
         public string PersonalAccessToken { get; set; }
         public List<VstsProject> Projects { get; set; }
