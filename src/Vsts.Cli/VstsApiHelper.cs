@@ -121,7 +121,7 @@ namespace Vsts.Cli
         public IEnumerable<Fields> GetWorkItemDetail(IEnumerable<int> workItemIds)
         {
             string workItemIdString = String.Join(",", workItemIds.Select(x => x.ToString()));
-            var uri = $"DefaultCollection/_apis/wit/WorkItems?ids={workItemIdString}&fields=System.Id,System.WorkItemType,System.Title,System.Description,System.AssignedTo,System.State,System.CreatedDate,System.Tags&api-version=1.0";
+            var uri = $"DefaultCollection/_apis/wit/WorkItems?ids={workItemIdString}&$expand=all&api-version=1.0";
 
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
