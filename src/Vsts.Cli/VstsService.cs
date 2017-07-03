@@ -113,7 +113,7 @@ namespace Vsts.Cli
             }
 
             //Now we can start to inspect the command-line arguments
-            var app = new CommandLineApplication(throwOnUnexpectedArg: false)
+            var app = new CommandLineApplication(throwOnUnexpectedArg: true)
             {
                 Name = "vsts",
                 Description = "Visual Studio Team Services Command Line Interface",
@@ -369,6 +369,8 @@ namespace Vsts.Cli
                 });
             });
 
+            // checks for any command aliases
+            // TODO figure out how to output or otherwise document aliases
             if (args.Any())
             {
                 var strings = Help.Split('|').Select(x => x.Trim());
@@ -377,7 +379,25 @@ namespace Vsts.Cli
             }
 
             app.HelpOption(Help);
-            app.Execute(args);
+
+            try
+            {
+                app.Execute(args);
+            }
+            catch (CommandParsingException e)
+            {
+                // Try to show the user the help system items for what they were trying to call
+                // Any valid args should have been rewriten by this point
+                if (args.Any())
+                {
+                    var command = app.Commands.FirstOrDefault(x => x.Name.Equals(args[0], StringComparison.OrdinalIgnoreCase));
+                    if (command == null)
+                        app.ShowHelp();
+                    else
+                        command.ShowHelp();
+                }
+                Console.WriteLine(e.Message, ConsoleColor.Yellow);
+            }
         }
     }
 }
