@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.CommandLineUtils;
 
 namespace Vsts.Cli
@@ -116,8 +118,7 @@ namespace Vsts.Cli
             var app = new CommandLineApplication(throwOnUnexpectedArg: true)
             {
                 Name = "vsts",
-                Description = "Visual Studio Team Services Command Line Interface",
-                ShowInHelpText = true
+                Description = "Visual Studio Team Services Command Line Interface"
             };
 
             app.Command(Command.Browse, config =>
@@ -310,7 +311,7 @@ namespace Vsts.Cli
                 var typeOption = config.Option("--workitemtype", "work item type [required]", CommandOptionType.SingleValue);
                 typeOption.ShortName = "w";
                 var titleOption = config.Option(CommandOptionTemplates.TitleTemplate, "work item title [required] ", CommandOptionType.SingleValue);
-                typeOption.ShortName = CommandOptionTemplates.TitleTemplateShort;
+                titleOption.ShortName = CommandOptionTemplates.TitleTemplateShort;
                 var descriptionOption = config.Option(CommandOptionTemplates.DescriptionTemplate, "work item description", CommandOptionType.SingleValue);
                 descriptionOption.ShortName = CommandOptionTemplates.DescriptionTemplateShort;
                 var priorityOption = config.Option(CommandOptionTemplates.PriorityTemplate, "work item priority", CommandOptionType.SingleValue);
@@ -369,6 +370,57 @@ namespace Vsts.Cli
                 });
             });
 
+            var pullRequestCreateCommand = pullRequestsCommand.Command(Command.Create, config =>
+            {
+                config.Description = "commands for creating a pull request";
+                config.HelpOption(Help);
+                var titleOption = config.Option(CommandOptionTemplates.TitleTemplate, "pull request title [required] ", CommandOptionType.SingleValue);
+                titleOption.ShortName = CommandOptionTemplates.TitleTemplateShort;
+                titleOption.ShowInHelpText = true;
+                var descriptionOption = config.Option(CommandOptionTemplates.DescriptionTemplate, "pull request description", CommandOptionType.SingleValue);
+                descriptionOption.ShortName = CommandOptionTemplates.DescriptionTemplateShort;
+                descriptionOption.ShowInHelpText = true;
+                var sourceRefNameOption = config.Option(CommandOptionTemplates.SourceReferenceNameTemplate, "source branch", CommandOptionType.SingleValue);
+                sourceRefNameOption.ShortName = CommandOptionTemplates.SourceReferenceNameTemplateShort;
+                sourceRefNameOption.ShowInHelpText = true;
+                var targetRefNameOption = config.Option(CommandOptionTemplates.TargetReferenceNameTemplate, "target branch", CommandOptionType.SingleValue);
+                targetRefNameOption.ShortName = CommandOptionTemplates.TargetReferenceNameTemplateShort;
+                targetRefNameOption.ShowInHelpText = true;
+
+                config.OnExecute(() =>
+                {
+
+                    var title = titleOption.HasValue() ? titleOption.Value() : vsts.LastCommit.Split(Environment.NewLine.ToCharArray()).FirstOrDefault();
+                    if (string.IsNullOrWhiteSpace(title))
+                    {
+                        Console.Write("Pull request title missing", ConsoleColor.Yellow);
+                        return 1;
+                    }
+
+                    var description = descriptionOption.HasValue() ? descriptionOption.Value() : vsts.LastCommit;
+                    var source = sourceRefNameOption.HasValue() ? sourceRefNameOption.Value() : vsts.RepositoryBranchName;
+                    var target = targetRefNameOption.HasValue() ? targetRefNameOption.Value() : "master";
+
+                    Console.WriteLine($"Create New Pull Request", ConsoleColor.Gray);
+                    Console.WriteLine($"-----------------------", ConsoleColor.Gray);
+                    Console.WriteLine($"Title: {title}", ConsoleColor.Gray);
+                    Console.WriteLine($"From: {source}", ConsoleColor.Gray);
+                    Console.WriteLine($"To: {target}", ConsoleColor.Gray);
+                    Console.WriteLine($"Description: {description}", ConsoleColor.Gray);
+                    Console.Write($"Submit this pull request y/[n] ", ConsoleColor.Yellow);
+                    var result = System.Console.ReadLine();
+
+                    if (result.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                        result.Equals("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var detail = vstsApiHelper.CreatePullRequest(vsts.RepositoryId, title, description, source, target);
+                        Console.WriteLine($"#{detail.PullRequestId} {detail.Title} by {detail.CreatedBy.DisplayName}");
+                    }
+
+                    return 0;
+                });
+            });
+
             // checks for any command aliases
             // TODO figure out how to output or otherwise document aliases
             if (args.Any())
@@ -390,7 +442,8 @@ namespace Vsts.Cli
                 // Any valid args should have been rewriten by this point
                 if (args.Any())
                 {
-                    var command = app.Commands.FirstOrDefault(x => x.Name.Equals(args[0], StringComparison.OrdinalIgnoreCase));
+                    var command =
+                        app.Commands.FirstOrDefault(x => x.Name.Equals(args[0], StringComparison.OrdinalIgnoreCase));
                     if (command == null)
                         app.ShowHelp();
                     else

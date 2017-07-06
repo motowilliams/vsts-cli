@@ -30,12 +30,7 @@ The token will be promped when you run the tool for the first time and attempt t
 - work items
 
 ### vsts 
-```    _  _  ____  ____  ____     ___  __    __ 
-   / )( \/ ___)(_  _)/ ___)   / __)(  )  (  )
-   \ \/ /\___ \  )(  \___ \  ( (__ / (_/\ )( 
-    \__/ (____/ (__) (____/   \___)\____/(__)
-Visual Studio Team Service Command Line Interface
-
+```
 Usage: vsts [options] [command]
 
 Options:
@@ -66,7 +61,6 @@ Commands:
 
 Use "vsts [command] --help" for more information about a command.
 ```
-## Browse
 ### vsts browse -h
 ```
 Usage: vsts browse [arguments] [options]
@@ -77,7 +71,6 @@ Arguments:
 Options:
   -? | -h | --help  Show help information
 ```
-## Builds
 ### vsts builds -h
 ```
 Usage: vsts builds [options] [command]
@@ -90,14 +83,13 @@ Commands:
 
 Use "builds [command] --help" for more information about a command.
 ```
-## Builds
 ### vsts builds log -h
 ```
 Usage: vsts builds log [options]
 
 Options:
   --id              build definition
-  --detail          build definition
+  --detail          how the log file for the build
   -? | -h | --help  Show help information
 ```
 ### vsts code -h
@@ -107,18 +99,32 @@ Usage: vsts code [options]
 Options:
   -? | -h | --help  Show help information
 ```
-## Pull Requests
 ### vsts pullrequests -h
 ```
-Usage: vsts pullrequests [arguments] [options]
+Usage: vsts pullrequests [arguments] [options] [command]
 
 Arguments:
   pull request identifier  pull request id to browse to
 
 Options:
   -? | -h | --help  Show help information
+
+Commands:
+  create  commands for creating a pull request
+
+Use "pullrequests [command] --help" for more information about a command.
 ```
-## Work Items
+### vsts pullrequests create -h
+```
+Usage: vsts pullrequests create [options]
+
+Options:
+  -? | -h | --help  Show help information
+  --title           pull request title [required] 
+  --description     pull request description
+  --source          source branch
+  --target          target branch
+```
 ### vsts workitems -h
 ```
 Usage: vsts workitems [arguments] [options] [command]
@@ -130,6 +136,7 @@ Options:
   --states          filter by states such as new, active, resolved, closed or removed
   --tags            filter by any tag that assigned to work items
   --description     include description
+  --my              only return open work items assigned to me
   --browse          browse specific work item in VSTS
   -? | -h | --help  Show help information
 
@@ -147,6 +154,7 @@ Options:
   --title           work item title [required] 
   --description     work item description
   --priority        work item priority
-  --tag             work item tags
+  --tags            work item tags
   -? | -h | --help  Show help information
+
 ```

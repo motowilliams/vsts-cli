@@ -50,6 +50,43 @@ namespace Vsts.Cli
             return resource.Value.AsEnumerable();
         }
 
+        public PullRequest CreatePullRequest(string repositoryId, string title, string description, string source, string target)
+        {
+            string uri = $"DefaultCollection/_apis/git/repositories/{repositoryId}/pullRequests?api-version=3.0";
+
+            var document = new
+            {
+                title = title,
+                description = description,
+                sourceRefName = $"refs/heads/{source}",
+                targetRefName = $"refs/heads/{target}"
+            };
+
+            var json = JsonConvert.SerializeObject(document);
+            var jsonContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            var method = new HttpMethod("POST");
+            var request = new HttpRequestMessage(method, uri) { Content = jsonContent };
+
+            var response = _httpClient.SendAsync(request).Result;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = response.Content.ReadAsStringAsync().Result;
+                var pullRequestErrorResource = JsonConvert.DeserializeObject<PullRequestErrorResource>(error);
+                Console.WriteLine(pullRequestErrorResource.message, ConsoleColor.Red);
+                return null;
+            }
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<PullRequest>(result);
+            return resource;
+        }
+
         public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null)
         {
             string uri = $"DefaultCollection/{projectName}/_apis/wit/wiql?api-version=1.0";

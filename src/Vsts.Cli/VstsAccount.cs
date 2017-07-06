@@ -42,6 +42,7 @@ namespace Vsts.Cli
         public string PersonalAccessToken => Accounts.FirstOrDefault(x => x.AccountName.Equals(GitHost, StringComparison.OrdinalIgnoreCase))?.PersonalAccessToken;
         public string RepositoryName => _gitConfiguration.Name;
         public string RepositoryBranchName => _gitConfiguration.CurrentBranch;
+        public string LastCommit => GitRepoHelpers.LastCommitMessage(_gitConfiguration.GitDirectory, 1);
         public string RepositoryId => ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory).GetCurrentRepositoryId(_gitConfiguration.GitDirectory);
 
         //Common VSTS Project Uris

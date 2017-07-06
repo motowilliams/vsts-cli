@@ -111,5 +111,17 @@ namespace Vsts.Cli
             var origin = Origin(directory);
             return origin.Host.Split('.').First();
         }
+
+        public static string LastCommitMessage(string path, int lastCommits = 1)
+        {
+            using (var repo = new LibGit2Sharp.Repository(path))
+            {
+                foreach (LibGit2Sharp.Commit c in repo.Commits.Take(lastCommits))
+                {
+                    return c.Message;
+                }
+            }
+            return null;
+        }
     }
 }

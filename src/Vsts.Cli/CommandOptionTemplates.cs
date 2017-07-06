@@ -22,5 +22,9 @@ namespace Vsts.Cli
         public const string TagTemplateShort = "t";
         public const string TitleTemplate = "--title";
         public const string TitleTemplateShort = "t";
+        public const string SourceReferenceNameTemplate = "--source";
+        public const string SourceReferenceNameTemplateShort = "sf";
+        public const string TargetReferenceNameTemplate = "--target";
+        public const string TargetReferenceNameTemplateShort = "tf";
     }
 }

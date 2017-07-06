@@ -11,6 +11,7 @@ $commands = @(
     "builds log -h",
     "code -h",
     "pullrequests -h",
+    "pullrequests create -h",
     "workitems -h"
     "workitems add -h"
 )

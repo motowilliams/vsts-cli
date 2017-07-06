@@ -12,5 +12,6 @@ namespace Vsts.Cli
         public const string TestManagement = "testmanagement";
         public const string Dashboard = "dashboard";
         public const string Browse = "browse";
+        public const string Create = "create";
     }
 }
