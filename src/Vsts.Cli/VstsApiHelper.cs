@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Vsts.Cli
 {
-    public class VstsApiHelper
+    public class VstsApiHelper : IVstsApiHelper
     {
         private readonly HttpClient _httpClient;
         private readonly string _pat;
