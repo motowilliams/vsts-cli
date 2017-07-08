@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace Vsts.Cli
 {
@@ -7,7 +6,7 @@ namespace Vsts.Cli
     {
         public static void Main(string[] args)
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
+            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
             GitConfiguration gitConfiguration = GitRepoHelpers.Create(currentDirectory);
 
             if (gitConfiguration.GitDirectory != null && gitConfiguration.NonVstsHost)
@@ -22,13 +21,16 @@ namespace Vsts.Cli
                 Environment.Exit(0);
             }
 
-            Vsts vsts = new Vsts(gitConfiguration);
+            var vsts = new Vsts(gitConfiguration);
+            var vstsProjectHelper = new VstsProjectHelper(vsts);
 
-            VstsApiHelper vstsApiHelper = VstsService.CheckStatus(gitConfiguration, vsts);
+            vstsProjectHelper.CheckAccessToken();
+            var vstsApiHelper = new VstsApiHelper(vsts.AccountUri, vsts.PersonalAccessToken);
+            vstsProjectHelper.CheckRemoteProjectLink(vstsApiHelper);
+            vstsProjectHelper.CheckLocalProjectLink(vstsApiHelper);
 
-            if (vstsApiHelper == null) return;
-
-            VstsService.ProcessArgs(args, vsts, vstsApiHelper);
+            var cli = new Cli(vsts, vstsApiHelper);
+            Environment.Exit(cli.Execute(args));
         }
     }
 }

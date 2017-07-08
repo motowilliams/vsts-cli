@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Vsts.Cli
 {
-    public class Vsts
+    public class Vsts : IVsts
     {
         private readonly GitConfiguration _gitConfiguration;
 
@@ -134,6 +134,50 @@ namespace Vsts.Cli
             Accounts.Add(configuration);
             var json = JsonConvert.SerializeObject(Accounts, Formatting.Indented);
             File.WriteAllText(VstsCliConfigPath, json);
+        }
+
+        public void BrowseCodeUri()
+        {
+            CodeUri.Browse();
+        }
+        public void BrowseCodeBranchUri()
+        {
+            CodeBranchUri.Browse();
+        }
+
+        public void BrowseBuildsUri()
+        {
+            BuildsUri.Browse();
+        }
+
+        public void BrowseReleasesUri()
+        {
+            ReleasesUri.Browse();
+        }
+
+        public void BrowseWorkItemsUri()
+        {
+            WorkItemsUri.Browse();
+        }
+
+        public void BrowsePullRequestUri()
+        {
+            PullRequestUri.Browse();
+        }
+
+        public void BrowseTestManagementUri()
+        {
+            TestManagementUri.Browse();
+        }
+
+        public void BrowseProjectUri()
+        {
+            ProjectUri.Browse();
+        }
+
+        public void BrowseAccountUri()
+        {
+            AccountUri.Browse();
         }
     }
 
