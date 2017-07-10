@@ -1,9 +1,10 @@
 using System;
+using FakeItEasy.Configuration;
 using Xunit;
 
 namespace Vsts.Cli.Tests
 {
-    public class for_help_command: Context
+    public class for_help_command : Context
     {
         [Theory]
         [InlineData("")]
@@ -13,7 +14,7 @@ namespace Vsts.Cli.Tests
         public void should_return_primary_root_help(string helpTemplate)
         {
             var execute = cli.Execute(helpTemplate);
-            
+
             Assert.Equal(0, execute);
             Assert.Equal(HelpCommandResponseFor.Root, cli.Response);
         }

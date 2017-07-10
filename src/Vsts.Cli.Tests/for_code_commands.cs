@@ -13,7 +13,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.Code);
 
             Assert.Equal(0, execute);
-            A.CallTo(() => vsts.CodeBranchUri).MustHaveHappened();
+            A.CallTo(() => vsts.BrowseCodeBranchUri()).MustHaveHappened();
         }
     }
 }
