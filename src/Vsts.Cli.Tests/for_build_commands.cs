@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+using System.Threading.Tasks;
 using FakeItEasy;
 using Xunit;
 
@@ -47,7 +47,6 @@ namespace Vsts.Cli.Tests
         public void should_return_non_zero_return_code_for_unknown_build_id()
         {
             GenFu.A.Configure<BuildListItem>().Fill(x => x.definition, () => GenFu.A.New<Definition>());
-            A.CallTo(() => adapter.GetBuildDetail(A<string>._, buildId)).Returns(null);
 
             var execute = cli.Execute(CommandName.Builds, CommandName.Logs, CommandOptionTemplates.IdTemplate, buildId.ToString());
 
