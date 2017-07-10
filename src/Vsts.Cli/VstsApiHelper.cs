@@ -116,7 +116,7 @@ namespace Vsts.Cli
                 if (filterBuilder.Length > 0)
                     filterBuilder.Append(" AND ");
 
-                filterBuilder.Append($"[System.WorkItemType] = \"{workItemType.NormalizeWorkItemType()}\"");
+                filterBuilder.Append($"[System.WorkItemType] = \"{workItemType.Normalize()}\"");
             }
 
             if (!string.IsNullOrWhiteSpace(assignedTo))
@@ -134,7 +134,7 @@ namespace Vsts.Cli
 
             //string workItemQuery = string.IsNullOrWhiteSpace(workItemType)
             //    ? $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) ORDER BY [System.ChangedDate] DESC"
-            //    : $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) AND [System.WorkItemType] = \"{workItemType.NormalizeWorkItemType()}\" ORDER BY [System.ChangedDate] DESC";
+            //    : $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) AND [System.WorkItemType] = \"{workItemType.Normalize()}\" ORDER BY [System.ChangedDate] DESC";
 
             var workItemSearchResource = JsonConvert.SerializeObject(new WorkItemSearchResource { Query = workItemQuery });
 
@@ -176,7 +176,7 @@ namespace Vsts.Cli
 
         public async Task<NewWorkItemResource> CreateWorkItem(string projectName, string workItemType, IEnumerable<object> document)
         {
-            string uri = $"{projectName}/_apis/wit/workitems/${workItemType.NormalizeWorkItemType()}?api-version=2.2";
+            string uri = $"{projectName}/_apis/wit/workitems/${workItemType.Normalize()}?api-version=2.2";
 
             //serialize the fields array into a json string
             var patchValue = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json-patch+json");

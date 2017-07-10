@@ -38,7 +38,7 @@ namespace Vsts.Cli
                 config.HelpOption(CommandName.HelpTemplate);
                 config.OnExecute(() =>
                 {
-                    switch (dashboardArgument.Value.NormalizeCommand())
+                    switch (dashboardArgument.Value.Normalize())
                     {
                         case CommandName.Code:
                             vsts.BrowseCodeUri();
@@ -145,7 +145,7 @@ namespace Vsts.Cli
                 config.HelpOption(CommandName.HelpTemplate);
                 config.OnExecute(() =>
                 {
-                    vsts.CodeBranchUri.Browse();
+                    vsts.BrowseCodeBranchUri();
                     return 0;
                 });
             });
@@ -345,27 +345,7 @@ namespace Vsts.Cli
 
         public new int Execute(params string[] args)
         {
-            if (args.Length == 1 && args[0] == string.Empty)
-            {
-                args = new[] { "-h" };
-            }
-
-            if (args == null || args.Length == 0)
-            {
-                Console.Logo();
-                args = new[] { "-h" };
-            }
-
-            if (args.Any())
-            {
-                var strings = CommandName.HelpTemplate.Split('|').Select(x => x.Trim());
-                if (!strings.Any(x => x.Equals(args[0], StringComparison.OrdinalIgnoreCase)))
-                    args[0] = args[0].NormalizeCommand();
-            }
-            else
-            {
-                args = new[] { "-h" };
-            }
+            args = args.AsUpdatedArray();
 
             int result = 1;
             try
@@ -398,4 +378,5 @@ namespace Vsts.Cli
             return result;
         }
     }
+
 }
