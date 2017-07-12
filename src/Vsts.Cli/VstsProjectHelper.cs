@@ -12,7 +12,7 @@ namespace Vsts.Cli
             this.vsts = vsts;
         }
 
-        public async void CheckAccessToken()
+        public void CheckAccessToken()
         {
             if (!vsts.NeedsAccessToken) return;
 
@@ -20,7 +20,7 @@ namespace Vsts.Cli
             var personalAccessToken = Console.ReadLine();
 
             var vstsApiHelper = new VstsApiHelper(vsts.AccountUri, personalAccessToken);
-            var vstsRepos = await vstsApiHelper.GetRepositories();
+            var vstsRepos = vstsApiHelper.GetRepositories();
             if (!vstsRepos.Any())
             {
                 Console.WriteLine($"Could not find an existing VSTS git repo that matches with the current git repo {vsts.RepositoryName}", ConsoleColor.Yellow);
@@ -30,11 +30,11 @@ namespace Vsts.Cli
             vsts.SetAccessToken(personalAccessToken);
         }
 
-        public async void CheckRemoteProjectLink(VstsApiHelper vstsApiHelper)
+        public void CheckRemoteProjectLink(VstsApiHelper vstsApiHelper)
         {
             if (vsts.IsInProject) return;
 
-            var repositories = await vstsApiHelper.GetRepositories();
+            var repositories = vstsApiHelper.GetRepositories();
             var vstsRepos = repositories.Where(x => x.Name.Equals(vsts.RepositoryName)).ToList();
             if (!vstsRepos.Any())
             {
@@ -75,7 +75,7 @@ namespace Vsts.Cli
             vsts.CreateNewConfiguration(selectedRepo.Name, selectedRepo.Id, selectedRepo.Project.Name, selectedRepo.Project.Id, vsts.PersonalAccessToken);
         }
 
-        public async void CheckLocalProjectLink(VstsApiHelper vstsApiHelper)
+        public void CheckLocalProjectLink(VstsApiHelper vstsApiHelper)
         {
             //Check to see if the current directories repo should be added to the vsts-cli configuration
             // this is for single vsts projects that have multiple repos
@@ -90,7 +90,7 @@ namespace Vsts.Cli
                 Environment.Exit(0);
             }
             
-            var repositories = await vstsApiHelper.GetRepositories();
+            var repositories = vstsApiHelper.GetRepositories();
             var vstsRepo = repositories.FirstOrDefault(x => x.Name.Equals(vsts.RepositoryName, StringComparison.OrdinalIgnoreCase));
             vsts.AddLocalDirectoryLink(vsts.RepositoryName, vstsRepo.Id);
         }

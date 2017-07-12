@@ -20,38 +20,38 @@ namespace Vsts.Cli
             _pat = Convert.ToBase64String(Encoding.ASCII.GetBytes(String.Format($"{String.Empty}:{token}")));
         }
 
-        public async Task<IEnumerable<Repository>> GetRepositories()
+        public IEnumerable<Repository> GetRepositories()
         {
             string uri = "DefaultCollection/_apis/git/repositories?api-version=1.0";
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<Repository>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<RepositoryResource>(result);
             return resource.Value.AsEnumerable();
         }
 
-        public async Task<IEnumerable<PullRequest>> GetPullRequests(string repositoryId)
+        public IEnumerable<PullRequest> GetPullRequests(string repositoryId)
         {
             string uri = "DefaultCollection/_apis/git/repositories/{0}/pullRequests?api-version=3.0";
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(String.Format(uri, repositoryId));
+            HttpResponseMessage response = _httpClient.GetAsync(String.Format(uri, repositoryId)).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<PullRequest>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<PullRequesetResource>(result);
             return resource.Value.AsEnumerable();
         }
 
-        public async Task<PullRequest> CreatePullRequest(string repositoryId, string title, string description, string source, string target)
+        public PullRequest CreatePullRequest(string repositoryId, string title, string description, string source, string target)
         {
             string uri = $"DefaultCollection/_apis/git/repositories/{repositoryId}/pullRequests?api-version=3.0";
 
@@ -73,22 +73,22 @@ namespace Vsts.Cli
             var method = new HttpMethod("POST");
             var request = new HttpRequestMessage(method, uri) { Content = jsonContent };
 
-            var response = await _httpClient.SendAsync(request);
+            var response = _httpClient.SendAsync(request).Result;
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
+                var error = response.Content.ReadAsStringAsync().Result;
                 var pullRequestErrorResource = JsonConvert.DeserializeObject<PullRequestErrorResource>(error);
                 Console.WriteLine(pullRequestErrorResource.message, ConsoleColor.Red);
                 return null;
             }
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<PullRequest>(result);
             return resource;
         }
 
-        public async Task<IEnumerable<WorkItem>> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null)
+        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null)
         {
             string uri = $"DefaultCollection/{projectName}/_apis/wit/wiql?api-version=1.0";
 
@@ -142,21 +142,21 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.PostAsync(uri, new StringContent(workItemSearchResource, Encoding.ASCII, "application/json"));
+            HttpResponseMessage response = _httpClient.PostAsync(uri, new StringContent(workItemSearchResource, Encoding.ASCII, "application/json")).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<WorkItem>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<WorkItemResource>(result);
             return resource.WorkItems.AsEnumerable();
         }
 
-        public async Task<IEnumerable<Fields>> GetWorkItemDetail(int workItemId)
+        public IEnumerable<Fields> GetWorkItemDetail(int workItemId)
         {
-            return await GetWorkItemDetail(new[] { workItemId });
+            return GetWorkItemDetail(new[] { workItemId });
         }
 
-        public async Task<IEnumerable<Fields>> GetWorkItemDetail(IEnumerable<int> workItemIds)
+        public IEnumerable<Fields> GetWorkItemDetail(IEnumerable<int> workItemIds)
         {
             string workItemIdString = String.Join(",", workItemIds.Select(x => x.ToString()));
             var uri = $"DefaultCollection/_apis/wit/WorkItems?ids={workItemIdString}&$expand=all&api-version=1.0";
@@ -165,16 +165,16 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<Fields>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<WorkItemDetailResource>(result);
             return resource.Value.Select(x => x.Fields);
         }
 
-        public async Task<NewWorkItemResource> CreateWorkItem(string projectName, string workItemType, IEnumerable<object> document)
+        public NewWorkItemResource CreateWorkItem(string projectName, string workItemType, IEnumerable<object> document)
         {
             string uri = $"{projectName}/_apis/wit/workitems/${workItemType.Normalize()}?api-version=2.2";
 
@@ -188,16 +188,16 @@ namespace Vsts.Cli
             var method = new HttpMethod("PATCH");
             var request = new HttpRequestMessage(method, uri) { Content = patchValue };
 
-            var response = await _httpClient.SendAsync(request);
+            var response = _httpClient.SendAsync(request).Result;
 
             if (!response.IsSuccessStatusCode) return null;
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<NewWorkItemResource>(result);
             return resource;
         }
 
-        public async Task<IEnumerable<BuildDefinition>> GetBuildList(string projectName)
+        public IEnumerable<BuildDefinition> GetBuildList(string projectName)
         {
             var uri = $"DefaultCollection/{projectName}/_apis/build/definitions";
 
@@ -205,16 +205,16 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<BuildDefinition>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<BuildDefinitionResource>(result);
             return resource.value.AsEnumerable();
         }
 
-        public async Task<IEnumerable<BuildListItem>> GetBuildListDetails(string projectName)
+        public IEnumerable<BuildListItem> GetBuildListDetails(string projectName)
         {
             var uri = $"DefaultCollection/{projectName}/_apis/build/builds";
 
@@ -222,16 +222,16 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<BuildListItem>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<BuildListResource>(result);
             return resource.value.AsEnumerable();
         }
 
-        public async Task<BuildListItem> GetBuildDetail(string projectName, int buildDefinitionId)
+        public BuildListItem GetBuildDetail(string projectName, int buildDefinitionId)
         {
             var uri = $"DefaultCollection/{projectName}/_apis/build/builds?definitions={buildDefinitionId}&statusFilter=completed&$top=1&api-version=2.0";
 
@@ -239,16 +239,16 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return null;
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<BuildListResource>(result);
             return resource.value.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<Record>> GetBuildTimeline(string projectName, int buildId)
+        public IEnumerable<Record> GetBuildTimeline(string projectName, int buildId)
         {
             var uri = $"DefaultCollection/{projectName}/_apis/build/builds/{buildId}/Timeline";
 
@@ -256,16 +256,16 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<Record>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<TimelineResource>(result);
             return resource.records.OrderBy(x => x.order);
         }
 
-        public async Task<IEnumerable<string>> GetBuildLogEntry(string projectName, int buildId, int logId)
+        public IEnumerable<string> GetBuildLogEntry(string projectName, int buildId, int logId)
         {
             var uri = $"DefaultCollection/{projectName}/_apis/build/builds/{buildId}/logs/{logId}";
 
@@ -273,11 +273,11 @@ namespace Vsts.Cli
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = await _httpClient.GetAsync(uri);
+            HttpResponseMessage response = _httpClient.GetAsync(uri).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<string>();
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<LogResource>(result);
             return resource.value;
         }
