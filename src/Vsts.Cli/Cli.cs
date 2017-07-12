@@ -74,9 +74,9 @@ namespace Vsts.Cli
                 config.Out = base.Out;
                 config.Description = "commands for working with VSTS build definitions";
                 config.HelpOption(CommandName.HelpTemplate);
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
-                    var details = await vstsApiHelper.GetBuildListDetails(vsts.ProjectName);
+                    var details = vstsApiHelper.GetBuildListDetails(vsts.ProjectName);
 
                     if (!details.Any())
                         return 1;
@@ -106,7 +106,7 @@ namespace Vsts.Cli
                 var buildLogDetailOption = config.Option(CommandOptionTemplates.DetailTemplate, "show the log file for the build", CommandOptionType.NoValue);
                 buildLogDetailOption.ShortName = CommandOptionTemplates.DetailTemplateShort;
                 config.HelpOption(CommandName.HelpTemplate);
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
                     if (!buildIdOption.HasValue() || !int.TryParse(buildIdOption.Value(), out int buildDefinitionId))
                     {
@@ -114,12 +114,12 @@ namespace Vsts.Cli
                         return 1;
                     }
 
-                    var detail = await vstsApiHelper.GetBuildDetail(vsts.ProjectName, buildDefinitionId);
+                    var detail = vstsApiHelper.GetBuildDetail(vsts.ProjectName, buildDefinitionId);
 
                     if (detail == null)
                         return 1;
 
-                    var records = await vstsApiHelper.GetBuildTimeline(vsts.ProjectName, detail.id);
+                    var records = vstsApiHelper.GetBuildTimeline(vsts.ProjectName, detail.id);
 
                     if (!records.Any())
                         return 1;
@@ -130,7 +130,7 @@ namespace Vsts.Cli
 
                     if (buildLogDetailOption.HasValue())
                     {
-                        var buildLogEntry = await vstsApiHelper.GetBuildLogEntry(vsts.ProjectName, detail.id, records.OrderBy(x => x.order).First().log.id);
+                        var buildLogEntry = vstsApiHelper.GetBuildLogEntry(vsts.ProjectName, detail.id, records.OrderBy(x => x.order).First().log.id);
                         buildLogEntry.ToList().ForEach(Console.WriteLine);
                     }
 
@@ -169,7 +169,7 @@ namespace Vsts.Cli
                 browseOption.ShortName = CommandOptionTemplates.BrowseTemplateShort;
 
                 config.HelpOption(CommandName.HelpTemplate);
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
                     IEnumerable<Fields> details = null;
                     bool singleWorkItem = false;
@@ -177,10 +177,10 @@ namespace Vsts.Cli
 
                     if (myWorkItemOption.HasValue())
                     {
-                        IEnumerable<WorkItem> searchWorkItems = await 
+                        IEnumerable<WorkItem> searchWorkItems = 
                             vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
                                 tagOption.Values, vsts.FullName);
-                        details = await vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
+                        details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
                     }
                     else if (Int32.TryParse(id.Value, out int workItemId))
                     {
@@ -189,14 +189,14 @@ namespace Vsts.Cli
                             vsts.WorkItemUri(workItemId).Browse();
                             return 0;
                         }
-                        details = await vstsApiHelper.GetWorkItemDetail(workItemId);
+                        details = vstsApiHelper.GetWorkItemDetail(workItemId);
                         singleWorkItem = true;
                     }
                     else
                     {
-                        IEnumerable<WorkItem> searchWorkItems = await vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
+                        IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
                                 tagOption.Values);
-                        details = await vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
+                        details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
                     }
 
                     if (!details.Any())
@@ -238,7 +238,7 @@ namespace Vsts.Cli
 
                 config.HelpOption(CommandName.HelpTemplate);
 
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
                     if (!typeOption.HasValue() || !titleOption.HasValue())
                     {
@@ -258,7 +258,7 @@ namespace Vsts.Cli
                     if (tagsOption.HasValue())
                         document.Add(new { op = "add", path = "/fields/System.Tags", value = String.Join(";", tagsOption.Values) });
 
-                    var detail = await vstsApiHelper.CreateWorkItem(vsts.ProjectName, typeOption.Value(), document);
+                    var detail = vstsApiHelper.CreateWorkItem(vsts.ProjectName, typeOption.Value(), document);
                     Console.WriteLine($"#{detail.Id} {detail.Fields.State} {detail.Fields.CreatedDate.ToLocalTime():yyyy/MM/dd} - {detail.Fields.Title.Trim()}");
 
                     return 0;
@@ -272,7 +272,7 @@ namespace Vsts.Cli
                 var id = config.Argument("pull request identifier", "pull request id to browse to");
                 id.ShowInHelpText = true;
                 config.HelpOption(CommandName.HelpTemplate);
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
                     if (Int32.TryParse(id.Value, out int pullRequestId))
                     {
@@ -280,7 +280,7 @@ namespace Vsts.Cli
                         return 0;
                     }
 
-                    IEnumerable<PullRequest> detail = await vstsApiHelper.GetPullRequests(vsts.RepositoryId);
+                    IEnumerable<PullRequest> detail = vstsApiHelper.GetPullRequests(vsts.RepositoryId);
                     foreach (var pullRequest in detail.OrderBy(x => x.CreationDate))
                         Console.WriteLine($"#{pullRequest.PullRequestId} {pullRequest.Title} by {pullRequest.CreatedBy.DisplayName}");
 
@@ -306,7 +306,7 @@ namespace Vsts.Cli
                 targetRefNameOption.ShortName = CommandOptionTemplates.TargetReferenceNameTemplateShort;
                 targetRefNameOption.ShowInHelpText = true;
 
-                config.OnExecute(async () =>
+                config.OnExecute(() =>
                 {
 
                     var title = titleOption.HasValue() ? titleOption.Value() : vsts.LastCommit.Split(Environment.NewLine.ToCharArray()).FirstOrDefault();
@@ -332,7 +332,7 @@ namespace Vsts.Cli
                     if (result.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
                         result.Equals("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        var detail = await vstsApiHelper.CreatePullRequest(vsts.RepositoryId, title, description, source, target);
+                        var detail = vstsApiHelper.CreatePullRequest(vsts.RepositoryId, title, description, source, target);
                         Console.WriteLine($"#{detail.PullRequestId} {detail.Title} by {detail.CreatedBy.DisplayName}");
                     }
 
