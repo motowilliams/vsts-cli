@@ -30,7 +30,8 @@ namespace Vsts.Cli
             vstsProjectHelper.CheckLocalProjectLink(vstsApiHelper);
 
             var cli = new Cli(vsts, vstsApiHelper);
-            Environment.Exit(cli.Execute(args));
+            var exitCode = cli.Execute(args);
+            Environment.Exit(exitCode);
         }
     }
 }

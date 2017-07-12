@@ -20,9 +20,15 @@ namespace Vsts.Cli
         {
             _gitConfiguration = gitConfiguration;
 
-            Accounts = File.Exists(VstsCliConfigPath)
-                ? JsonConvert.DeserializeObject<List<VstsAccount>>(File.ReadAllText(VstsCliConfigPath))
-                : new List<VstsAccount>();
+            if (File.Exists(VstsCliConfigPath))
+            {
+                var readAllText = File.ReadAllText(VstsCliConfigPath);
+                Accounts = readAllText.Any() ? JsonConvert.DeserializeObject<List<VstsAccount>>(readAllText) : new List<VstsAccount>();
+            }
+            else
+            {
+                Accounts = new List<VstsAccount>();
+            }
         }
 
         private VstsAccount ActiveAccount => Accounts.FirstOrDefault(x => x.HasRegisteredGitDirectory(_gitConfiguration.GitDirectory));
@@ -117,7 +123,7 @@ namespace Vsts.Cli
             File.WriteAllText(VstsCliConfigPath, json);
         }
 
-        public void SetAccessToken(string personalAccessToken)
+        public void SetAccountInfo(string personalAccessToken, string fullName)
         {
             //check to see if this account is in the configuration
             var configuration = Accounts.FirstOrDefault(x => x.AccountName.Equals(GitHost, StringComparison.OrdinalIgnoreCase));
@@ -129,6 +135,7 @@ namespace Vsts.Cli
             {
                 AccountName = _gitConfiguration.Host,
                 PersonalAccessToken = personalAccessToken,
+                FullName = fullName,
                 Projects = new List<VstsProject>()
             };
             Accounts.Add(configuration);
