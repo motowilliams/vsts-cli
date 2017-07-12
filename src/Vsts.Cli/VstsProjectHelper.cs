@@ -16,6 +16,9 @@ namespace Vsts.Cli
         {
             if (!vsts.NeedsAccessToken) return;
 
+            Console.Write("Please enter name as recorded in your VSTS account: ", ConsoleColor.Green);
+            var fullName = Console.ReadLine();
+
             Console.Write("Please enter your personal access token: ", ConsoleColor.Green);
             var personalAccessToken = Console.ReadLine();
 
@@ -27,7 +30,7 @@ namespace Vsts.Cli
                 Environment.Exit(0);
             }
 
-            vsts.SetAccessToken(personalAccessToken);
+            vsts.SetAccountInfo(personalAccessToken, fullName);
         }
 
         public async void CheckRemoteProjectLink(VstsApiHelper vstsApiHelper)

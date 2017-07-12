@@ -32,7 +32,7 @@ namespace Vsts.Cli
         
         void AddLocalDirectoryLink(string repositoryName, string repositoryId);
         void CreateNewConfiguration(string repositoryName, string repositoryId, string projectName, string projectId, string personalAccessToken);
-        void SetAccessToken(string personalAccessToken);
+        void SetAccountInfo(string personalAccessToken, string fullName);
 
         void BrowseCodeUri();
         void BrowseCodeBranchUri();
