@@ -19,7 +19,7 @@ namespace Vsts.Cli
         public const string StatesTemplate = "--states";
         public const string StatesTemplateShort = "s";
         public const string TagTemplate = "--tags";
-        public const string TagTemplateShort = "t";
+        public const string TagTemplateShort = "tg";
         public const string TitleTemplate = "--title";
         public const string TitleTemplateShort = "t";
         public const string SourceReferenceNameTemplate = "--source";
