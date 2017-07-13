@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Vsts.Cli
 {
@@ -20,7 +22,7 @@ namespace Vsts.Cli
             var fullName = Console.ReadLine();
 
             Console.Write("Please enter your personal access token: ", ConsoleColor.Green);
-            var personalAccessToken = Console.ReadLine();
+            var personalAccessToken = ReadMaskedInput();
 
             var vstsApiHelper = new VstsApiHelper(vsts.AccountUri, personalAccessToken);
             var vstsRepos = vstsApiHelper.GetRepositories();
@@ -32,6 +34,21 @@ namespace Vsts.Cli
 
             vsts.SetAccountInfo(personalAccessToken, fullName);
         }
+
+        private static string ReadMaskedInput(char mask = '*')
+        {
+            var builder = new StringBuilder();
+            char chr;
+            while ((chr = System.Console.ReadKey(true).KeyChar) != 13 /*enterKey*/)
+            {
+                builder.Append(chr);
+                System.Console.Write(mask);
+            }
+
+            System.Console.WriteLine();
+            return builder.ToString();
+        }
+
 
         public void CheckRemoteProjectLink(VstsApiHelper vstsApiHelper)
         {
@@ -92,7 +109,7 @@ namespace Vsts.Cli
             {
                 Environment.Exit(0);
             }
-            
+
             var repositories = vstsApiHelper.GetRepositories();
             var vstsRepo = repositories.FirstOrDefault(x => x.Name.Equals(vsts.RepositoryName, StringComparison.OrdinalIgnoreCase));
             vsts.AddLocalDirectoryLink(vsts.RepositoryName, vstsRepo.Id);
