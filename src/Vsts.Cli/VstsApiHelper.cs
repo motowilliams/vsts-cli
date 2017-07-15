@@ -51,7 +51,8 @@ namespace Vsts.Cli
             return resource.Value.AsEnumerable();
         }
 
-        public PullRequest CreatePullRequest(string repositoryId, string title, string description, string source, string target)
+        public PullRequest CreatePullRequest(string repositoryId, string title, string description, string source,
+            string target)
         {
             string uri = $"DefaultCollection/_apis/git/repositories/{repositoryId}/pullRequests?api-version=3.0";
 
@@ -88,7 +89,8 @@ namespace Vsts.Cli
             return resource;
         }
 
-        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null)
+        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state,
+            IEnumerable<string> tags, string assignedTo = null)
         {
             string uri = $"DefaultCollection/{projectName}/_apis/wit/wiql?api-version=1.0";
 
@@ -130,19 +132,22 @@ namespace Vsts.Cli
             if (filterBuilder.Length > 0)
                 filterBuilder.Insert(0, "AND ");
 
-            string workItemQuery = $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" {filterBuilder} ORDER BY [System.ChangedDate] DESC";
+            string workItemQuery =
+                $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" {filterBuilder} ORDER BY [System.ChangedDate] DESC";
 
             //string workItemQuery = string.IsNullOrWhiteSpace(workItemType)
             //    ? $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) ORDER BY [System.ChangedDate] DESC"
             //    : $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) AND [System.WorkItemType] = \"{workItemType.Normalize()}\" ORDER BY [System.ChangedDate] DESC";
 
-            var workItemSearchResource = JsonConvert.SerializeObject(new WorkItemSearchResource { Query = workItemQuery });
+            var workItemSearchResource =
+                JsonConvert.SerializeObject(new WorkItemSearchResource { Query = workItemQuery });
 
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
 
-            HttpResponseMessage response = _httpClient.PostAsync(uri, new StringContent(workItemSearchResource, Encoding.ASCII, "application/json")).Result;
+            HttpResponseMessage response = _httpClient
+                .PostAsync(uri, new StringContent(workItemSearchResource, Encoding.ASCII, "application/json")).Result;
 
             if (!response.IsSuccessStatusCode) return Enumerable.Empty<WorkItem>();
 
@@ -179,7 +184,8 @@ namespace Vsts.Cli
             string uri = $"{projectName}/_apis/wit/workitems/${workItemType.Normalize()}?api-version=2.2";
 
             //serialize the fields array into a json string
-            var patchValue = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, "application/json-patch+json");
+            var patchValue = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8,
+                "application/json-patch+json");
 
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -195,6 +201,32 @@ namespace Vsts.Cli
             var result = response.Content.ReadAsStringAsync().Result;
             var resource = JsonConvert.DeserializeObject<NewWorkItemResource>(result);
             return resource;
+        }
+
+        public BuildListItem QueueBuildDefinition(string projectName, BuildDefinitionQueueResource buildDefinitionQueueResource)
+        {
+            var uri = $"/DefaultCollection/{projectName}/_apis/build/builds?api-version=2.0";
+
+            //serialize the fields array into a json string
+            var serializeObject = JsonConvert.SerializeObject(buildDefinitionQueueResource);
+            var content = new StringContent(serializeObject, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", _pat);
+
+            var method = new HttpMethod("POST");
+            var request = new HttpRequestMessage(method, uri) { Content = content };
+
+            var response = _httpClient.SendAsync(request).Result;
+
+            if (!response.IsSuccessStatusCode) return null;
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var resource = JsonConvert.DeserializeObject<BuildListItem>(result);
+            return resource;
+
+
         }
 
         public IEnumerable<BuildDefinition> GetBuildList(string projectName)

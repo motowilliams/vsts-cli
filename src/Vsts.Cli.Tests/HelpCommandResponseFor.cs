@@ -73,7 +73,8 @@ Options:
   -? | -h | --help  Show help information
 
 Commands:
-  logs  view latest build log for build definition
+  logs   view latest build log for build definition
+  queue  commands for queueing a new build definition
 
 Use ""builds [command] --help"" for more information about a command.
 
@@ -86,6 +87,16 @@ Usage: vsts builds logs [options]
 Options:
   --id              build definition id
   --detail          show the log file for the build
+  -? | -h | --help  Show help information
+
+";
+
+        public static string BuildsQueue => @"
+
+Usage: vsts builds queue [options]
+
+Options:
+  --id              build definition id
   -? | -h | --help  Show help information
 
 ";

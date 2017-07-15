@@ -6,7 +6,7 @@ namespace Vsts.Cli
     {
         public static void Main(string[] args)
         {
-            string currentDirectory = System.IO.Directory.GetCurrentDirectory();
+            string currentDirectory = Environment.GetEnvironmentVariable("vsts-cli-directory") ?? System.IO.Directory.GetCurrentDirectory();
             GitConfiguration gitConfiguration = GitRepoHelpers.Create(currentDirectory);
 
             if (gitConfiguration.GitDirectory != null && gitConfiguration.NonVstsHost)
