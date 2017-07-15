@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Vsts.Cli
 {
@@ -596,4 +597,22 @@ namespace Vsts.Cli
         public int errorCode { get; set; }
         public int eventId { get; set; }
     }
+
+    //Build definition queue
+
+    public class BuildDefinitionQueueResource
+    {
+        [JsonProperty("Definition")]
+        public DefinitionId definition { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string sourceBranch { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string parameters { get; set; }
+    }
+
+    public class DefinitionId
+    {
+        public int id { get; set; }
+    }
+
 }

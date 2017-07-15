@@ -138,6 +138,30 @@ namespace Vsts.Cli
                 });
             });
 
+            buildCommand.Command(CommandName.Queue, config =>
+            {
+                config.Out = base.Out;
+                config.Description = "commands for queueing a new build definition";
+                var buildIdOption = config.Option(CommandOptionTemplates.IdTemplate, "build definition id", CommandOptionType.SingleValue);
+                buildIdOption.ShortName = CommandOptionTemplates.IdTemplateShort;
+
+                config.HelpOption(CommandName.HelpTemplate);
+
+                config.OnExecute(() =>
+                {
+                    if (!int.TryParse(buildIdOption.Value(), out int buildId))
+                    {
+                        config.ShowHelp(CommandName.Queue);
+                        return 1;
+                    }
+
+                    BuildListItem detail = vstsApiHelper.QueueBuildDefinition(vsts.ProjectName, new BuildDefinitionQueueResource { definition = new DefinitionId { id = buildId } });
+                    Console.WriteLine($"{detail.definition.id} {detail.status} {detail.result} {detail.definition.name} {detail.TimeReport} {detail.buildNumber}", detail.ConsoleColor);
+
+                    return 0;
+                });
+            });
+
             var codeCommand = Command(CommandName.Code, config =>
             {
                 config.Out = base.Out;
@@ -177,7 +201,7 @@ namespace Vsts.Cli
 
                     if (myWorkItemOption.HasValue())
                     {
-                        IEnumerable<WorkItem> searchWorkItems = 
+                        IEnumerable<WorkItem> searchWorkItems =
                             vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
                                 tagOption.Values, vsts.FullName);
                         details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));

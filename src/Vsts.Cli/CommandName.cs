@@ -9,6 +9,7 @@ namespace Vsts.Cli
         public const string WorkItems = "workitems";
         public const string Builds = "builds";
         public const string Logs = "logs";
+        public const string Queue = "queue";
         public const string Releases = "releases";
         public const string TestManagement = "testmanagement";
         public const string Dashboard = "dashboard";

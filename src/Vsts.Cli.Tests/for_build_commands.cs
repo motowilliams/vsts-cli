@@ -28,6 +28,22 @@ namespace Vsts.Cli.Tests
 
             Assert.Equal(0, execute);
         }
+
+        [Fact]
+        public void should_return_build_queue_help_for_help_arg()
+        {
+            var execute = cli.Execute(CommandName.Builds, CommandName.Queue, CommandName.DashH);
+
+            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response);
+        }
+
+        [Fact]
+        public void should_return_build_queue_help_for_no_id()
+        {
+            var execute = cli.Execute(CommandName.Builds, CommandName.Queue);
+
+            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response);
+        }
     }
 
     public class for_build_log_commands : Context
