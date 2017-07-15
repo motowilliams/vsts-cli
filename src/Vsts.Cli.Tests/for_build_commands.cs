@@ -34,7 +34,7 @@ namespace Vsts.Cli.Tests
         {
             var execute = cli.Execute(CommandName.Builds, CommandName.Queue, CommandName.DashH);
 
-            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Vsts.Cli.Tests
         {
             var execute = cli.Execute(CommandName.Builds, CommandName.Queue);
 
-            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.BuildsQueue, cli.Response, ignoreLineEndingDifferences: true);
         }
     }
 
@@ -55,7 +55,7 @@ namespace Vsts.Cli.Tests
         {
             var execute = cli.Execute(CommandName.Builds, CommandName.Logs);
 
-            Assert.Equal(HelpCommandResponseFor.BuildsLog, (string)cli.Response);
+            Assert.Equal(HelpCommandResponseFor.BuildsLog, (string)cli.Response, ignoreLineEndingDifferences: true);
             Assert.Equal(1, execute);
         }
 

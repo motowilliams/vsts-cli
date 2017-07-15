@@ -16,7 +16,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(helpTemplate);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.Root, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.Root, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.Browse, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.Browse, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.Browse, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.Builds, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.Builds, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.Builds, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.PullRequests, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.PullRequest, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.PullRequest, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.PullRequests, CommandName.Create, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.PullRequestCreate, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.PullRequestCreate, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.Code, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.Code, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.Code, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.WorkItems, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.WorkItems, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.WorkItems, cli.Response, ignoreLineEndingDifferences: true);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace Vsts.Cli.Tests
             var execute = cli.Execute(CommandName.WorkItems, CommandName.Add, CommandName.DashH);
 
             Assert.Equal(0, execute);
-            Assert.Equal(HelpCommandResponseFor.WorkItemsAdd, cli.Response);
+            Assert.Equal(HelpCommandResponseFor.WorkItemsAdd, cli.Response, ignoreLineEndingDifferences: true);
         }
     }
 }
