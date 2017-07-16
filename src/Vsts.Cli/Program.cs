@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace Vsts.Cli
 {
@@ -6,6 +7,13 @@ namespace Vsts.Cli
     {
         public static void Main(string[] args)
         {
+            //No need to run any checks on directories, check for personal access tokens as we're only running the help sub-system
+            if (args.Intersect(new[] { CommandName.DashDashHelp, CommandName.DashH, CommandName.DashQuestion }, StringComparer.OrdinalIgnoreCase).Any())
+            {
+                new Cli(null, null).Execute(args);
+                Environment.Exit(0);
+            }
+
             string currentDirectory = Environment.GetEnvironmentVariable("vsts-cli-directory") ?? System.IO.Directory.GetCurrentDirectory();
             GitConfiguration gitConfiguration = GitRepoHelpers.Create(currentDirectory);
 
