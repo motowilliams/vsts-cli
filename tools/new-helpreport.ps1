@@ -9,7 +9,7 @@ $commands = @(
     "-h",
     "browse -h",
     "builds -h",
-    "builds log -h",
+    "builds logs -h",
     "builds queue -h",
     "code -h",
     "pullrequests -h",
@@ -30,7 +30,7 @@ $commands | ForEach-Object {
     Write-Output '```' | Out-File -Append -FilePath $helpFile
 }
 
-(Get-Content $helpFile -Raw) -replace "(\r\n){2,}", "`r`n" | Out-File -Encoding ascii -FilePath $helpFile
+(Get-Content $helpFile -Raw) -replace "(\r\n){3,}", "`r`n" | Out-File -Encoding ascii -FilePath $helpFile
 
 $readme = "$repoRoot\Readme.md"
 Get-Content "$repoRoot\Readme-Header.md" | Out-File -FilePath $readme -Encoding ascii
