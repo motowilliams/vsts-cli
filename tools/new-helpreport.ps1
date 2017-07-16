@@ -18,21 +18,28 @@ $commands = @(
     "workitems add -h"
 )
 
-New-Item -ItemType File $helpFile -Force | Out-Null
-Write-Output "## Current Supported Commands" | Out-File -Append -FilePath $helpFile
-$commands | ForEach-Object {
-    $commandOutput = Invoke-CommandString -command $command -commandArgs $_
-    Write-Output "### $command $_" | Out-File -Append -FilePath $helpFile
-    Write-Output '```' | Out-File -Append -FilePath $helpFile
-    $commandOutput | `
-        Select-String -NotMatch -SimpleMatch $currentDirectory | `
-        Out-File -Append -FilePath $helpFile
-    Write-Output '```' | Out-File -Append -FilePath $helpFile
+$readme = "$repoRoot\readme.md"
+$helpOutputSection = "## Current Supported Commands"
+
+$readmelines = (Get-Content $readme).Split([Environment]::NewLine)
+New-Item -ItemType File $readme -Force | Out-Null
+foreach ($line in $readmelines) {
+    if ($line -eq $helpOutputSection) {
+        break;
+    }
+    $line | Add-Content -Encoding Ascii -Path $readme
 }
 
-(Get-Content $helpFile -Raw) -replace "(\r\n){3,}", "`r`n" | Out-File -Encoding ascii -FilePath $helpFile
+Write-Output $helpOutputSection | Out-File -Encoding ascii -Append -FilePath $readme
 
-$readme = "$repoRoot\Readme.md"
-Get-Content "$repoRoot\Readme-Header.md" | Out-File -FilePath $readme -Encoding ascii
-Get-Content $helpFile | Out-File -Append -FilePath $readme -Encoding ascii
-Remove-Item $helpFile
+$commands | ForEach-Object {
+    $commandOutput = Invoke-CommandString -command $command -commandArgs $_
+    Write-Output "### $command $_" | Out-File -Encoding ascii -Append -FilePath $readme
+    Write-Output '```' | Out-File -Encoding ascii -Append -FilePath $readme
+    $commandOutput | `
+        Select-String -NotMatch -SimpleMatch $currentDirectory | `
+        Out-File -Encoding ascii -Append -FilePath $readme
+    Write-Output '```' | Out-File -Encoding ascii -Append -FilePath $readme
+}
+
+(Get-Content $readme -Raw) -replace "(\r\n){3,}", "`r`n" | Out-File -Encoding ascii -FilePath $readme

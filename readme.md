@@ -21,7 +21,9 @@ Since VSTS is a project first based service versus a repo first service like Git
     - Repo-1
     - Repo-2
 
-The token will be promped when you run the tool for the first time and attempt to link a remoted VSTS git repo with the current directory.
+For the inital first run you will need:
+- Your name as it is set in your VSTS account. This is for work item queries.
+- A [personal access token](https://www.visualstudio.com/en-us/docs/setup-admin/team-services/use-personal-access-tokens-to-authenticate) which is used to authencate API requests
 
 ## Current Supported Commands
 ### vsts -h
