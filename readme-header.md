@@ -1,5 +1,7 @@
 # VSTS CLI
 
+[![Build status](https://ci.appveyor.com/api/projects/status/pm0g4i50j6e10d6e?svg=true)](https://ci.appveyor.com/project/motowilliams/vsts-cli)
+
 The VSTS CLI is a tool for working with VSTS from a terminal environment. Its intent is to help with the more used functions that a developer would be using on a day to day basis. All commands start with `vsts` then followed by the primary `argument`.
 
 ## Authentication

@@ -293,3 +293,5 @@ src/.nuget/nuget.exe
 
 # Visual Studio Code
 .vscode/
+
+*.orig
