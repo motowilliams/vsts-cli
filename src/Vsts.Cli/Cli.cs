@@ -178,52 +178,30 @@ namespace Vsts.Cli
             {
                 config.Out = base.Out;
                 config.Description = "commands for working with VSTS work items";
-                var id = config.Argument("work item identifier", "work item id or type, such as epic, user story, task or bug");
-                id.ShowInHelpText = true;
 
-                var stateOption = config.Option(CommandOptionTemplates.StatesTemplate, "filter by states such as new, active, resolved, closed or removed", CommandOptionType.MultipleValue);
-                stateOption.ShortName = CommandOptionTemplates.StatesTemplateShort;
-                var tagOption = config.Option(CommandOptionTemplates.TagTemplate, "filter by any tag that assigned to work items", CommandOptionType.MultipleValue);
-                tagOption.ShortName = CommandOptionTemplates.TagTemplateShort;
-                var descriptionOption = config.Option(CommandOptionTemplates.DescriptionTemplate, "include description", CommandOptionType.NoValue);
-                descriptionOption.ShortName = CommandOptionTemplates.DescriptionTemplateShort;
-                var myWorkItemOption = config.Option(CommandOptionTemplates.MyTemplate, "only return open work items assigned to me", CommandOptionType.NoValue);
-                myWorkItemOption.ShortName = CommandOptionTemplates.MyTemplateShort;
-                var browseOption = config.Option(CommandOptionTemplates.BrowseTemplate, "browse specific work item in VSTS", CommandOptionType.NoValue);
-                browseOption.ShortName = CommandOptionTemplates.BrowseTemplateShort;
+                // Setup arguments and options
+                config.Arguments.Add(CommandSets.WorkItemType());
+                config.Options.Add(CommandSets.WorkItemState());
+                config.Options.Add(CommandSets.WorkItemTags());
+                config.Options.Add(CommandSets.WorkItemDescription());
+                config.Options.Add(CommandSets.WorkItemForMe());
+                config.Options.Add(CommandSets.WorkItemBrowse());
 
                 config.HelpOption(CommandName.HelpTemplate);
                 config.OnExecute(() =>
                 {
-                    IEnumerable<Fields> details = null;
-                    bool singleWorkItem = false;
-                    var stateArgumentValues = stateOption.AsStateDefault();
+                    var searchQuery = new SearchQuery(vsts, config.AsWorkItemState(), config.AsWorkItemTags(), config.AsWorkItemCommand(), config.AsWorkItemForMe());
 
-                    if (myWorkItemOption.HasValue())
+                    if (config.AsWorkItemBrowse().HasValue() && searchQuery.QueryType == WorkItemQueryType.ById)
                     {
-                        IEnumerable<WorkItem> searchWorkItems =
-                            vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
-                                tagOption.Values, vsts.FullName);
-                        details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
-                    }
-                    else if (Int32.TryParse(id.Value, out int workItemId))
-                    {
-                        if (browseOption.HasValue())
-                        {
-                            vsts.WorkItemUri(workItemId).Browse();
-                            return 0;
-                        }
-                        details = vstsApiHelper.GetWorkItemDetail(workItemId);
-                        singleWorkItem = true;
-                    }
-                    else
-                    {
-                        IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(vsts.ProjectName, id.Value, stateArgumentValues,
-                                tagOption.Values);
-                        details = vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id));
+                        vsts.WorkItemUri(searchQuery.WorkItemId.Value).Browse();
+                        return 0;
                     }
 
-                    if (!details.Any())
+                    IEnumerable<WorkItem> searchWorkItems = vstsApiHelper.SearchWorkItems(searchQuery);
+                    var details = searchWorkItems.Any() ? vstsApiHelper.GetWorkItemDetail(searchWorkItems.Select(x => x.id)) : Enumerable.Empty<Fields>();
+
+                    if (details == null || !details.Any())
                         return 0;
 
                     var detailIdWidth = details.Max(x => x.WorkItemIdLength);
@@ -237,7 +215,7 @@ namespace Vsts.Cli
                         var assignedTo = $"{detail.AssignedToName ?? CommandName.Unassigned}";
                         var color = string.IsNullOrWhiteSpace(detail.AssignedToName) ? ConsoleColor.DarkYellow : ConsoleColor.Green;
                         Console.WriteLine($"#{detail.Id.ToString().PadRight(detailIdWidth)} {detail.State.PadRight(stateWidth)} {detail.WorkItemType.PadRight(workItemTypeWidth)} {detail.CreatedDate.ToLocalTime():yyyy/MM/dd} {assignedTo.PadRight(assignedToNameWidth)} {detail.Title.Trim()} : {detail.Tags ?? "no tags"}", color);
-                        if (singleWorkItem || descriptionOption.HasValue())
+                        if (searchQuery.QueryType == WorkItemQueryType.ById || config.AsWorkItemDescription().HasValue())
                             Console.WriteLine($"{" ".PadRight(detailIdWidth + 1)} {detail.Description ?? "no description provided"}", color);
                     }
 

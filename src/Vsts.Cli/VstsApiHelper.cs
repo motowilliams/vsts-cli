@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Vsts.Cli
@@ -89,58 +88,11 @@ namespace Vsts.Cli
             return resource;
         }
 
-        public IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state,
-            IEnumerable<string> tags, string assignedTo = null)
+        public IEnumerable<WorkItem> SearchWorkItems(SearchQuery searchQuery)
         {
-            string uri = $"DefaultCollection/{projectName}/_apis/wit/wiql?api-version=1.0";
+            string uri = $"DefaultCollection/{searchQuery.ProjectName}/_apis/wit/wiql?api-version=1.0";
 
-            var stateList = string.Join(",", state.Select(x => $"\"{x}\""));
-
-            var filterBuilder = new StringBuilder();
-            if (state.Any())
-            {
-                filterBuilder.Append("(");
-                var itemQuery = string.Join(",", state.Select(x => $"\"{x}\""));
-                filterBuilder.Append($"[System.State] IN ({itemQuery})");
-                filterBuilder.Append(")");
-            }
-
-            if (tags.Any())
-            {
-                if (filterBuilder.Length > 0)
-                    filterBuilder.Append(" AND ");
-
-                filterBuilder.Append(string.Join(" AND ", tags.Select(tag => $"[System.Tags] Contains \"{tag}\"")));
-            }
-
-            if (!string.IsNullOrWhiteSpace(workItemType))
-            {
-                if (filterBuilder.Length > 0)
-                    filterBuilder.Append(" AND ");
-
-                filterBuilder.Append($"[System.WorkItemType] = \"{workItemType.Normalize()}\"");
-            }
-
-            if (!string.IsNullOrWhiteSpace(assignedTo))
-            {
-                if (filterBuilder.Length > 0)
-                    filterBuilder.Append(" AND ");
-
-                filterBuilder.Append($"[System.AssignedTo] CONTAINS \"{assignedTo}\"");
-            }
-
-            if (filterBuilder.Length > 0)
-                filterBuilder.Insert(0, "AND ");
-
-            string workItemQuery =
-                $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" {filterBuilder} ORDER BY [System.ChangedDate] DESC";
-
-            //string workItemQuery = string.IsNullOrWhiteSpace(workItemType)
-            //    ? $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) ORDER BY [System.ChangedDate] DESC"
-            //    : $"SELECT [System.Id] FROM workitems WHERE [System.TeamProject] = \"{projectName}\" AND [System.State] IN ({stateList}) AND [System.WorkItemType] = \"{workItemType.Normalize()}\" ORDER BY [System.ChangedDate] DESC";
-
-            var workItemSearchResource =
-                JsonConvert.SerializeObject(new WorkItemSearchResource { Query = workItemQuery });
+            var workItemSearchResource = JsonConvert.SerializeObject(new WorkItemSearchResource { Query = searchQuery.Query });
 
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
