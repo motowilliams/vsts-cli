@@ -15,7 +15,7 @@ namespace Vsts.Cli
         IEnumerable<Repository> GetRepositories();
         IEnumerable<Fields> GetWorkItemDetail(IEnumerable<int> workItemIds);
         IEnumerable<Fields> GetWorkItemDetail(int workItemId);
-        IEnumerable<WorkItem> SearchWorkItems(string projectName, string workItemType, IEnumerable<string> state, IEnumerable<string> tags, string assignedTo = null);
+        IEnumerable<WorkItem> SearchWorkItems(SearchQuery searchQuery);
         BuildListItem QueueBuildDefinition(string projectName, BuildDefinitionQueueResource buildDefinitionQueueResource);
     }
 }
