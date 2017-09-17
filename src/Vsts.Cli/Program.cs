@@ -29,7 +29,7 @@ namespace Vsts.Cli
                 Environment.Exit(0);
             }
 
-            var vsts = new Vsts(gitConfiguration);
+            var vsts = new Vsts(gitConfiguration, Environment.GetEnvironmentVariable("runscopeBucket"));
             var vstsProjectHelper = new VstsProjectHelper(vsts);
 
             vstsProjectHelper.CheckAccessToken();
