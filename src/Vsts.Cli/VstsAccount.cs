@@ -9,6 +9,7 @@ namespace Vsts.Cli
     public class Vsts : IVsts
     {
         private readonly GitConfiguration _gitConfiguration;
+        private readonly string _runscopeBucket;
 
         private static string UserprofileDirectory => Environment.GetEnvironmentVariable("USERPROFILE");
         private static string ConfigDirectory => Path.Combine(UserprofileDirectory, ".config");
@@ -16,9 +17,10 @@ namespace Vsts.Cli
 
         private List<VstsAccount> Accounts { get; set; }
 
-        public Vsts(GitConfiguration gitConfiguration)
+        public Vsts(GitConfiguration gitConfiguration, string runscopeBucket = null)
         {
             _gitConfiguration = gitConfiguration;
+            _runscopeBucket = runscopeBucket;
 
             if (File.Exists(VstsCliConfigPath))
             {
@@ -52,17 +54,20 @@ namespace Vsts.Cli
         public string RepositoryId => ActiveAccount.CurrentProject(_gitConfiguration.GitDirectory).GetCurrentRepositoryId(_gitConfiguration.GitDirectory);
 
         //Common VSTS Project Uris
-        public Uri PullRequestIdUri(int pullRequestId) => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_git/{RepositoryName}/pullrequest/{pullRequestId}");
-        public Uri PullRequestUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_git/{RepositoryName}/pullrequests?_a=active");
-        public Uri AccountUri => new Uri($"https://{GitHost}.visualstudio.com");
-        public Uri WorkItemUri(int id) => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_workitems?id={id}");
-        public Uri WorkItemsUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_backlogs");
-        public Uri ProjectUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}");
-        public Uri CodeUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_git/{RepositoryName}");
-        public Uri CodeBranchUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_git/{RepositoryName}?version=GB{RepositoryBranchName}&_a=contents");
-        public Uri BuildsUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_build?_a=allDefinitions");
-        public Uri ReleasesUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_release");
-        public Uri TestManagementUri => new Uri($"https://{GitHost}.visualstudio.com/{ProjectName}/_testManagement");
+        private string vstsHostAddressTemplate => $"{GitHost}.visualstudio.com";
+        private string runscopeHostAddressTemplate => $"{vstsHostAddressTemplate.Replace("-", "--").Replace(".", "-")}-{_runscopeBucket}.runscope.net";
+        public Uri AccountUri => string.IsNullOrWhiteSpace(_runscopeBucket) ? new Uri($"https://{vstsHostAddressTemplate}") : new Uri($"https://{runscopeHostAddressTemplate}");
+
+        public Uri PullRequestIdUri(int pullRequestId) => new Uri($"{AccountUri}/{ProjectName}/_git/{RepositoryName}/pullrequest/{pullRequestId}");
+        public Uri PullRequestUri => new Uri($"{AccountUri}/{ProjectName}/_git/{RepositoryName}/pullrequests?_a=active");
+        public Uri WorkItemUri(int id) => new Uri($"{AccountUri}/{ProjectName}/_workitems?id={id}");
+        public Uri WorkItemsUri => new Uri($"{AccountUri}/{ProjectName}/_backlogs");
+        public Uri ProjectUri => new Uri($"{AccountUri}/{ProjectName}");
+        public Uri CodeUri => new Uri($"{AccountUri}/{ProjectName}/_git/{RepositoryName}");
+        public Uri CodeBranchUri => new Uri($"{AccountUri}/{ProjectName}/_git/{RepositoryName}?version=GB{RepositoryBranchName}&_a=contents");
+        public Uri BuildsUri => new Uri($"{AccountUri}/{ProjectName}/_build?_a=allDefinitions");
+        public Uri ReleasesUri => new Uri($"{AccountUri}/{ProjectName}/_release");
+        public Uri TestManagementUri => new Uri($"{AccountUri}/{ProjectName}/_testManagement");
 
         public void CreateNewConfiguration(string repositoryName, string repositoryId, string projectName, string projectId, string personalAccessToken)
         {
