@@ -69,7 +69,7 @@ namespace Vsts.Cli
                     return configuration;
 
                 configuration.Name = origin.Url.Split('/').Last();
-                configuration.Host = new Uri(origin.Url).Host.Split('.').First();
+                configuration.Host = new Uri(origin.Url).UserInfo;
                 configuration.CurrentBranch = repo.Head.FriendlyName;
             }
 
